@@ -595,36 +595,37 @@ const handleUpdateStatus = async () => {
                     })
                 }
             }
+        }
 
             // Không tự động cập nhật order status khi cập nhật shipping status
             // Admin có thể cập nhật order status riêng nếu cần
-        } else if (statusType.value === 'payment') {
-            if (!newPaymentStatus.value) {
-                updateStatusError.value = 'Vui lòng chọn trạng thái giao dịch mới!'
-                return
-            }
-            // Find payment
-            const orderId = selectedOrderForUpdate.value.order_id
-            const payment = paymentStore.payments?.find(p => {
-                const pOrderId = p.order_id || p.order?.order_id
-                return pOrderId === orderId
-            })
-            if (!payment) {
-                updateStatusError.value = 'Không tìm thấy giao dịch cho đơn hàng này!'
-                return
-            }
-            const paymentId = payment.payment_id || payment.id
-            if (!paymentId) {
-                updateStatusError.value = 'Không tìm thấy mã giao dịch!'
-                return
-            }
-            const currentPaymentStatus = payment.status
-            if (newPaymentStatus.value === currentPaymentStatus) {
-                updateStatusError.value = 'Trạng thái giao dịch mới phải khác trạng thái hiện tại!'
-                return
-            }
-            await paymentStore.updatePaymentStatusStore(paymentId, newPaymentStatus.value)
-        }
+        // } else if (statusType.value === 'payment') {
+        //     if (!newPaymentStatus.value) {
+        //         updateStatusError.value = 'Vui lòng chọn trạng thái giao dịch mới!'
+        //         return
+        //     }
+        //     // Find payment
+        //     const orderId = selectedOrderForUpdate.value.order_id
+        //     const payment = paymentStore.payments?.find(p => {
+        //         const pOrderId = p.order_id || p.order?.order_id
+        //         return pOrderId === orderId
+        //     })
+        //     if (!payment) {
+        //         updateStatusError.value = 'Không tìm thấy giao dịch cho đơn hàng này!'
+        //         return
+        //     }
+        //     const paymentId = payment.payment_id || payment.id
+        //     if (!paymentId) {
+        //         updateStatusError.value = 'Không tìm thấy mã giao dịch!'
+        //         return
+        //     }
+        //     const currentPaymentStatus = payment.status
+        //     if (newPaymentStatus.value === currentPaymentStatus) {
+        //         updateStatusError.value = 'Trạng thái giao dịch mới phải khác trạng thái hiện tại!'
+        //         return
+        //     }
+        //     await paymentStore.updatePaymentStatusStore(paymentId, newPaymentStatus.value)
+        // }
 
         closeUpdateStatusModal()
         await loadOrders() // Reload orders and payments

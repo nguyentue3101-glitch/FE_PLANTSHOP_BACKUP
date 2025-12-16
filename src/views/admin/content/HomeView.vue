@@ -59,7 +59,7 @@
           <div class="absolute top-0 right-0 w-20 h-20 bg-blue-200 rounded-full -mr-10 -mt-10 opacity-20"></div>
           <div class="relative">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-semibold text-blue-800">Tổng Người Dùng</h2>
+              <h2 class="text-lg font-semibold text-blue-800">Người Dùng</h2>
               <div class="p-3 bg-blue-500 rounded-lg shadow-md">
                 <Users class="w-6 h-6 text-white" />
               </div>
@@ -76,8 +76,7 @@
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h2 class="text-lg font-semibold text-green-800">
-                  {{ viewType === 'year' ? `Tổng Sản Phẩm Bán Năm` :
-                    `Tổng Sản Phẩm Bán Tháng` }}
+                  Tổng Sản Phẩm
                 </h2>
                 <p class="text-sm text-green-600 mt-1">
                   {{ viewType === 'year' ? selectedYear :
@@ -100,8 +99,7 @@
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h2 class="text-lg font-semibold text-purple-800">
-                  {{ viewType === 'year' ? `Doanh Thu Năm` :
-                    `Doanh Thu Tháng` }}
+                  Doanh Thu
                 </h2>
 
                 <p class="text-sm text-purple-600 mt-1">
@@ -128,8 +126,7 @@
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h2 class="text-lg font-semibold text-red-800">
-                  {{ viewType === 'year' ? `Tổng Đơn Năm` :
-                    `Tổng Đơn Tháng` }}
+                  Tổng Đơn
                 </h2>
 
                 <p class="text-sm text-red-600 mt-1">

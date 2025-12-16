@@ -66,7 +66,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useOrderStore } from '@/stores/orders'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
-import { useShippingFee } from '@/composables/useShippingFee'
+// import { useShippingFee } from '@/composables/useShippingFee'
 import OrderCard from '@/components/common/user/OrderCard.vue'
 import LoadingErrorState from '@/components/common/LoadingErrorState.vue'
 import BackButton from '@/components/common/user/BackButton.vue'
@@ -81,7 +81,7 @@ const orderStore = useOrderStore()
 const paymentStore = usePaymentStore()
 const depositStore = useDepositStore()
 const { isLoading, errorMessage, executeAsync, resetError } = useAsyncOperation()
-const { getShippingFeeFromOrder } = useShippingFee()
+// const { getShippingFeeFromOrder } = useShippingFee()
 
 const orders = ref([])
 const showCancelModal = ref(false)
@@ -177,7 +177,7 @@ const handleMoMoPaymentReturn = async () => {
         const order = orderResp.data.data
         const orderStatus = order.status
         const depositRequired = order.deposit_required || false
-        const deposit = order.deposit || null
+        // const deposit = order.deposit || null
 
         // Kiểm tra deposit.paid = 0 cho TẤT CẢ các đơn hàng có deposit_required TRƯỚC khi xử lý payment status
         // Nếu deposit.paid = 0, hủy đơn hàng ngay lập tức

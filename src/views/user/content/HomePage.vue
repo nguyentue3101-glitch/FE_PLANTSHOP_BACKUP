@@ -21,7 +21,7 @@
 
     <section class="px-10 relative">
       <h2 class="text-3xl font-semibold text-green-700 mb-8 text-center">
-        Danh mục nổi bật
+        Danh Mục
       </h2>
       <div class="relative overflow-hidden">
         <!-- tính toán index slide sau khi kéo -->
@@ -66,7 +66,7 @@
     <!-- Section: Sản phẩm nổi bật -->
     <section class="px-10 py-12 relative">
       <h2 class="text-3xl font-semibold text-green-700 mb-8 text-center">
-        Sản phẩm nổi bật
+        Sản Phẩm Nổi Bật
       </h2>
 
       <div class="flex transition-transform duration-300 ease-in-out gap-6 px-10">

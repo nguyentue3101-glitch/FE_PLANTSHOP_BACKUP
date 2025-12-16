@@ -247,7 +247,7 @@ import { useUserStore } from '@/stores/user'
 import { usePaymentMethodStore } from '@/stores/payment-methods'
 import { usePaymentStore } from '@/stores/payments'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
-import { useProvinces } from '@/composables/useProvinces'
+// import { useProvinces } from '@/composables/useProvinces'
 import { useShippingFee } from '@/composables/useShippingFee'
 import BackButton from '@/components/common/user/BackButton.vue'
 import DepositModal from '@/components/common/user/DepositModal.vue'
@@ -264,7 +264,7 @@ const userStore = useUserStore()
 const paymentMethodStore = usePaymentMethodStore()
 const paymentStore = usePaymentStore()
 const { isLoading: isCreatingOrder, errorMessage, executeAsync } = useAsyncOperation()
-const { provinces, getProvinceByCode } = useProvinces()
+// const { provinces, getProvinceByCode } = useProvinces()
 const { calculateShippingFeeByCity } = useShippingFee()
 
 const shippingInfo = ref({})
