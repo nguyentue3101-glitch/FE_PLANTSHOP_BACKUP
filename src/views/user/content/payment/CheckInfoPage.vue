@@ -71,6 +71,7 @@ import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUserStore } from '@/stores/user'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
+import { useProvinces } from '@/composables/useProvinces'
 import ConfirmLeaveModal from '@/components/common/ConfirmLeaveModal.vue'
 import AddressSelector from '@/components/common/AddressSelector.vue'
 
@@ -79,6 +80,9 @@ const route = useRoute()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const { isLoading, errorMessage, executeAsync } = useAsyncOperation()
+
+// Sử dụng composable để load dữ liệu tỉnh thành
+const { loadProvinces, isLoading: isLoadingProvinces } = useProvinces()
 
 const formData = ref({
     username: '',
@@ -135,6 +139,14 @@ onMounted(async () => {
     // (flag này có thể còn sót từ lần thanh toán trước)
     sessionStorage.removeItem('order_completed')
     // KHÔNG xóa completed_order_id vì có thể cần dùng để cập nhật shipping info
+
+    // Load dữ liệu tỉnh thành từ API trước để đảm bảo sẵn sàng khi AddressSelector render
+    try {
+        await loadProvinces()
+        console.log('✅ CheckInfoPage - Loaded provinces from API')
+    } catch (error) {
+        console.error('❌ CheckInfoPage - Failed to load provinces from API:', error)
+    }
 
     try {
         const token = authStore.accessToken

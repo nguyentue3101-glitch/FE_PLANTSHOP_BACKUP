@@ -19,7 +19,7 @@
             <DataPager v-model="currentPageActive" :items="filteredDiscounts" :page-size="PAGE_SIZE" :show-active="true"
                 :show-filter="true" controls-class="mb2" @update:selectedActive="selectedActive = $event">
                 <template #default="{ items }">
-                    <CommonTable :headers="['ID', 'CODE', 'TÊN MÃ', 'GIÁ TRỊ', 'LOẠI', 'SỐ LƯỢNG']"
+                    <CommonTable :headers="['ID', 'CODE', 'TÊN MÃ', 'GIÁ TRỊ', 'LOẠI', 'SỐ LƯỢNG SẢN PHẨM']"
                         :keys="['discount_id', 'discount_code', 'discount_name', 'value', 'type', 'quantity']"
                         :data="items" title-class="font-bold text-2xl">
                         <template #cell-value="{ item }">

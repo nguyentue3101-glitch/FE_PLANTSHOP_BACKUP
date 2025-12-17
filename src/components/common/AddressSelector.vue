@@ -9,16 +9,23 @@
             </div>
 
             <select :id="`city-${componentId}`" v-model="cityId" :required="required" @change="handleCityChange"
-                :disabled="isLoadingProvinces" :class="[
-                    'w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2',
+                :disabled="isLoadingProvinces || provincesError" :class="[
+                    'w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2',
                     focusRingClass,
-                    isLoadingProvinces ? 'bg-gray-100 cursor-not-allowed' : ''
+                    isLoadingProvinces || provincesError ? 'bg-gray-100 cursor-not-allowed border-gray-300' : 'border-gray-300',
+                    provincesError ? 'border-red-300' : ''
                 ]">
-                <option :value="null">{{ isLoadingProvinces ? 'Đang tải...' : 'Chọn thành phố' }}</option>
+                <option :value="null">
+                    {{ isLoadingProvinces ? 'Đang tải...' : provincesError ? 'Không thể tải dữ liệu' : 'Chọn thành phố'
+                    }}
+                </option>
                 <option v-for="city in cities" :key="city.id" :value="city.id">
                     {{ city.name }}
                 </option>
             </select>
+            <p v-if="provincesError" class="mt-1 text-xs text-red-600">
+                {{ provincesError }}
+            </p>
         </div>
 
         <!-- Quận/Huyện (Dropdown) -->
@@ -290,6 +297,16 @@ onMounted(async () => {
         console.log('✅ Loaded provinces from API')
     } catch (err) {
         console.error('❌ Failed to load provinces from API:', err)
+        // Hiển thị thông báo lỗi cho người dùng
+        if (err.message) {
+            errorMessage.value = `Không thể tải danh sách tỉnh thành: ${err.message}`
+        } else if (err.response?.status === 502) {
+            errorMessage.value = 'API đang gặp sự cố. Vui lòng thử lại sau.'
+        } else if (err.code === 'ERR_NETWORK' || err.message?.includes('CORS')) {
+            errorMessage.value = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.'
+        } else {
+            errorMessage.value = 'Không thể tải danh sách tỉnh thành. Vui lòng thử lại sau.'
+        }
     }
 
     // Nếu đã có city_id trong modelValue, sử dụng nó

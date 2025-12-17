@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { getProvinces, getProvinceByCode } from '@/api/location/get'
+import { getProvinces, getProvinceByCode, getDistrictsByProvince } from '@/api/location/get'
 
 // Cache dữ liệu tỉnh thành để tránh gọi API nhiều lần
 const provincesCache = ref(null)
@@ -24,38 +24,50 @@ export function useProvinces() {
     error.value = null
 
     try {
-      // Gọi API với depth=2 để lấy provinces + districts (theo yêu cầu API)
-      const data = await getProvinces(2)
+      // Gọi API mới
+      const data = await getProvinces()
       
       console.log('📦 API Response (first province sample):', data[0])
+      console.log('📦 API Response keys:', data[0] ? Object.keys(data[0]) : 'No data')
       
-      // Transform dữ liệu từ API format sang format của ứng dụng
-      const transformedProvinces = data.map(province => ({
-        code: province.code,
-        name: province.name,
-        codename: province.codename,
-        division_type: province.division_type,
-        phone_code: province.phone_code,
-        districts: province.districts || []
-      }))
+      // Transform dữ liệu từ API format mới sang format của ứng dụng
+      // Lưu ý: API mới không trả về districts trong provinces/getAll
+      // Districts sẽ được load riêng từ districts/getByProvince khi cần
+      const transformedProvinces = data.map((province, index) => {
+        // Log để debug format (chỉ log 2 province đầu)
+        if (index < 2) {
+          console.log(`🔍 Transforming province ${index}:`, province)
+        }
+        
+        const transformed = {
+          code: province.code || province.province_id || province.id || province.provinceCode,
+          name: province.name || province.province_name || province.provinceName,
+          codename: province.codename || province.slug,
+          division_type: province.division_type || province.type || province.divisionType,
+          phone_code: province.phone_code || province.phone || province.phoneCode,
+          districts: [] // Districts sẽ được load riêng khi cần
+        }
+        
+        // Chuẩn hóa code về format 2 chữ số (01, 02, ...)
+        if (transformed.code) {
+          transformed.code = String(transformed.code).padStart(2, '0')
+        }
+        
+        // Log nếu không có code hoặc name
+        if (!transformed.code || !transformed.name) {
+          console.warn('⚠️ Province missing code or name:', province, transformed)
+        }
+        
+        return transformed
+      })
+      
+      console.log('✅ Transformed provinces count:', transformedProvinces.length)
+      console.log('✅ First transformed province:', transformedProvinces[0])
 
       provincesCache.value = transformedProvinces
       
-      // Cache districts theo province code (vì API trả về districts với depth=2)
-      transformedProvinces.forEach(province => {
-        if (province.districts && province.districts.length > 0) {
-          districtsCache.value[province.code] = province.districts.map(district => ({
-            code: district.code,
-            name: district.name, // Name đầy đủ từ API (ví dụ: "Thành phố Bà Rịa", "Thành phố Vũng Tàu")
-            codename: district.codename,
-            division_type: district.division_type,
-            province_code: district.province_code
-          }))
-          console.log(`✅ Cached ${districtsCache.value[province.code].length} districts for province ${province.code} (${province.name})`)
-        } else {
-          console.warn(`⚠️ No districts found for province ${province.code} (${province.name})`)
-        }
-      })
+      // Không cache districts ở đây vì API mới không trả về districts trong provinces/getAll
+      // Districts sẽ được load riêng từ districts/getByProvince khi cần
 
       console.log('📊 Total provinces cached:', transformedProvinces.length)
       console.log('📊 Total provinces with districts:', Object.keys(districtsCache.value).length)
@@ -86,14 +98,17 @@ export function useProvinces() {
       return []
     }
     
-    if (!districtsCache.value[provinceCode]) {
-      console.warn(`⚠️ getDistrictsByProvinceCode: No districts found in cache for province code ${provinceCode}`)
+    // Chuẩn hóa provinceCode về format 2 chữ số
+    const normalizedCode = String(provinceCode).padStart(2, '0')
+    
+    if (!districtsCache.value[normalizedCode]) {
+      console.warn(`⚠️ getDistrictsByProvinceCode: No districts found in cache for province code ${normalizedCode}`)
       console.log('📋 Available province codes in cache:', Object.keys(districtsCache.value))
       return []
     }
     
-    const districts = districtsCache.value[provinceCode]
-    console.log(`✅ getDistrictsByProvinceCode: Found ${districts.length} districts in cache for province ${provinceCode}`)
+    const districts = districtsCache.value[normalizedCode]
+    console.log(`✅ getDistrictsByProvinceCode: Found ${districts.length} districts in cache for province ${normalizedCode}`)
     return districts
   }
 
@@ -105,47 +120,58 @@ export function useProvinces() {
       return []
     }
     
+    // Chuẩn hóa provinceCode về format 2 chữ số
+    const normalizedCode = String(provinceCode).padStart(2, '0')
+    
     // Nếu đã có trong cache, trả về ngay
-    if (districtsCache.value[provinceCode]) {
-      console.log(`✅ loadDistrictsForProvince: Using cached districts for province ${provinceCode}`)
-      return districtsCache.value[provinceCode]
+    if (districtsCache.value[normalizedCode]) {
+      console.log(`✅ loadDistrictsForProvince: Using cached districts for province ${normalizedCode}`)
+      return districtsCache.value[normalizedCode]
     }
     
-    // Nếu chưa có trong cache, load từ API
-    console.log(`🔄 loadDistrictsForProvince: Loading districts for province ${provinceCode} from API...`)
+    // Nếu chưa có trong cache, load từ API mới
+    console.log(`🔄 loadDistrictsForProvince: Loading districts for province ${normalizedCode} from API...`)
     try {
-      // Gọi API để lấy chi tiết province với districts
-      const provinceData = await getProvinceByCode(provinceCode, 1) // depth=1 để lấy districts
+      // Gọi API mới để lấy districts theo province code
+      const districtsData = await getDistrictsByProvince(normalizedCode)
       
-      console.log('📦 Province data from API:', {
-        code: provinceData?.code,
-        name: provinceData?.name,
-        hasDistricts: !!provinceData?.districts,
-        districtsCount: provinceData?.districts?.length || 0
+      console.log('📦 Districts data from API:', {
+        provinceCode: normalizedCode,
+        districtsCount: districtsData?.length || 0,
+        sampleDistrict: districtsData?.[0]
       })
       
-      if (provinceData && provinceData.districts && provinceData.districts.length > 0) {
-        districtsCache.value[provinceCode] = provinceData.districts.map(district => ({
-          code: district.code,
-          name: district.name, // Name đầy đủ từ API (ví dụ: "Thành phố Bà Rịa", "Thành phố Vũng Tàu", "Quận 1", "Huyện Cần Giờ")
-          codename: district.codename,
-          division_type: district.division_type,
-          province_code: district.province_code
-        }))
-        console.log(`✅ loadDistrictsForProvince: Loaded ${districtsCache.value[provinceCode].length} districts for province ${provinceCode} (${provinceData.name})`)
-        console.log('📋 Sample districts:', districtsCache.value[provinceCode].slice(0, 5).map(d => `${d.name} (${d.division_type})`))
-        return districtsCache.value[provinceCode]
+      if (districtsData && Array.isArray(districtsData) && districtsData.length > 0) {
+        districtsCache.value[normalizedCode] = districtsData.map(district => {
+          const transformed = {
+            code: district.code || district.district_id || district.id,
+            name: district.name || district.district_name, // Name đầy đủ từ API
+            codename: district.codename || district.slug,
+            division_type: district.division_type || district.type,
+            province_code: district.province_code || normalizedCode
+          }
+          
+          // Chuẩn hóa code về format 3 chữ số (001, 002, ...)
+          if (transformed.code) {
+            transformed.code = String(transformed.code).padStart(3, '0')
+          }
+          
+          return transformed
+        })
+        console.log(`✅ loadDistrictsForProvince: Loaded ${districtsCache.value[normalizedCode].length} districts for province ${normalizedCode}`)
+        console.log('📋 Sample districts:', districtsCache.value[normalizedCode].slice(0, 5).map(d => `${d.name} (${d.division_type})`))
+        return districtsCache.value[normalizedCode]
       } else {
-        console.warn(`⚠️ loadDistrictsForProvince: Province ${provinceCode} has no districts in API response`)
-        console.log('📋 Full province data:', provinceData)
+        console.warn(`⚠️ loadDistrictsForProvince: No districts found for province ${normalizedCode}`)
+        districtsCache.value[normalizedCode] = [] // Cache empty array để tránh gọi lại
+        return []
       }
     } catch (err) {
-      console.error(`❌ Error loading districts for province ${provinceCode}:`, err)
+      console.error(`❌ Error loading districts for province ${normalizedCode}:`, err)
       console.error('Error details:', err.response?.data || err.message)
+      districtsCache.value[normalizedCode] = [] // Cache empty array để tránh gọi lại
+      return []
     }
-    
-    console.warn(`⚠️ loadDistrictsForProvince: No districts found for province code ${provinceCode}`)
-    return []
   }
 
   /**

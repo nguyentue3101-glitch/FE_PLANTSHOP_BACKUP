@@ -119,19 +119,19 @@ export const useCartStore = defineStore("cart", () => {
   // Kiểm tra sản phẩm có hết hàng hoặc ngưng kinh doanh không
   const isItemOutOfStockOrDeleted = (item) => {
     // Kiểm tra ngưng kinh doanh
-    const deleted = item?._deleted ?? item?.is_deleted ?? item?.products?._deleted
+    const deleted = item?.is_deleted
     if (deleted === true || deleted === 1) {
       return true
     }
 
     // Kiểm tra flag out_of_stock từ backend
-    const outOfStock = item?.out_of_stock ?? item?.products?.out_of_stock
+    const outOfStock = item?.products?.out_of_stock
     if (outOfStock === true || outOfStock === 1) {
       return true
     }
 
     // Kiểm tra stock = 0 hoặc stock < số lượng trong giỏ hàng
-    const availableStock = item.stock ?? item.products?.quantity ?? 0
+    const availableStock = item.products?.quantity ?? 0
     const cartQuantity = item.quantity || 0
 
     // Nếu stock = 0 hoặc số lượng trong giỏ hàng lớn hơn stock hiện có

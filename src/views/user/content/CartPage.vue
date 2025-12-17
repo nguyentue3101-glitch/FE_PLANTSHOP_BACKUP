@@ -80,7 +80,7 @@
 
                         <!-- Product Image -->
                         <div class="flex-shrink-0 w-full sm:w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center"
-                            :class="{ 'pointer-events-none opacity-50': isOutOfStock(item) || isDeleted(item) }">
+                            :class="{ ' opacity-50': isOutOfStock(item) || isDeleted(item) }">
                             <img :src="getProductImage(item)" :alt="getProductName(item)"
                                 class="max-w-full max-h-full w-auto h-auto object-contain"
                                 @error="handleImageError($event)" />
@@ -89,7 +89,7 @@
                         <!-- Product Info -->
                         <div class="flex-1 flex flex-col justify-between">
                             <div class="flex-1 flex flex-col justify-between"
-                                :class="{ 'pointer-events-none opacity-50': isOutOfStock(item) || isDeleted(item) }">
+                                :class="{ 'opacity-50': isOutOfStock(item) || isDeleted(item) }">
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-800 mb-2">
                                         {{ getProductName(item) }}
@@ -158,15 +158,15 @@
                                 <span>Tổng số lượng:</span>
                                 <span class="font-semibold">{{ selectedTotalItems }} sản phẩm</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
-                                <span>Tạm tính:</span>
-                                <span class="font-semibold">{{ formatPrice(selectedTotalPrice) }}</span>
-                            </div>
-
                             <div class="border-t pt-3 flex justify-between text-lg font-bold text-gray-800">
-                                <span>Tổng cộng:</span>
+                                <span>Tạm tính:</span>
                                 <span class="text-green-600">{{ formatPrice(selectedTotalPrice) }}</span>
                             </div>
+
+                            <!-- <div class="border-t pt-3 flex justify-between text-lg font-bold text-gray-800">
+                                <span>Tổng cộng:</span>
+                                <span class="text-green-600">{{ formatPrice(selectedTotalPrice) }}</span>
+                            </div> -->
                         </div>
 
                         <button @click="handleCheckout"
@@ -291,7 +291,7 @@ const getUserId = () => {
 const selectedCount = computed(() => {
     return cartStore.cartItems
         .filter(item => {
-            const identifier = item.cart_detail_id || item.product_id || item.id
+            const identifier = item.cart_detail_id 
             return selectedItems.value.has(identifier) && !isOutOfStock(item) && !isDeleted(item)
         }).length
 })
@@ -305,7 +305,7 @@ const selectableItemsCount = computed(() => {
 const selectedTotalItems = computed(() => {
     return cartStore.cartItems
         .filter(item => {
-            const identifier = item.cart_detail_id || item.product_id || item.id
+            const identifier = item.cart_detail_id 
             return selectedItems.value.has(identifier)
         })
         .reduce((sum, item) => sum + item.quantity, 0)
@@ -745,7 +745,7 @@ const handleCheckout = () => {
             selectedItems: JSON.stringify(
                 cartStore.cartItems
                     .filter(item => {
-                        const identifier = item.cart_detail_id || item.product_id || item.id
+                        const identifier = item.cart_detail_id 
                         return selectedItems.value.has(identifier)
                     })
                     .map(item => ({

@@ -28,6 +28,18 @@ export default defineConfig({
         target: 'http://localhost:1234',
         changeOrigin: true,
         secure: false,
+      },
+      // Proxy cho provinces API để tránh lỗi CORS
+      '/provinces-api': {
+        target: 'https://provinces.open-api.vn',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/provinces-api/, '/api/v1'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('Proxy error:', err)
+          })
+        }
       }
     }
   }
