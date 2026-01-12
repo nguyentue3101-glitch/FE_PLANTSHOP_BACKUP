@@ -606,13 +606,13 @@ const loadProduct = async () => {
         try {
             const response = await getProductById(productId)
 
-            if (response.data && response.data.success) {
-                console.log('Product loaded successfully:', response.data.data)
+            if (response.data && response.success) {
+                console.log('Product loaded successfully:', response.data)
                 // Force clear old product first
                 product.value = null
                 await nextTick()
                 // Set new product
-                product.value = { ...response.data.data }
+                product.value = { ...response.data }
                 quantity.value = 1
                 // Load reviews cho sản phẩm
                 const loadedProductId = product.value.product_id || product.value.id
@@ -621,7 +621,7 @@ const loadProduct = async () => {
                 }
                 console.log('Product value after assignment:', product.value)
             } else {
-                localErrorMessage.value = response.data?.message || 'Không tìm thấy sản phẩm'
+                localErrorMessage.value = response?.message || 'Không tìm thấy sản phẩm'
             }
         } catch (error) {
             try {
@@ -658,7 +658,7 @@ const loadProduct = async () => {
                 } else if (error.response.status === 500) {
                     errorMsg = 'Lỗi server. Vui lòng thử lại sau.'
                 } else {
-                    errorMsg = error.response.data?.message || `Lỗi ${error.response.status}: ${error.response.statusText}`
+                    errorMsg = error.response?.message || `Lỗi ${error.response.status}: ${error.response.statusText}`
                 }
             } else if (error.message) {
                 errorMsg = error.message
