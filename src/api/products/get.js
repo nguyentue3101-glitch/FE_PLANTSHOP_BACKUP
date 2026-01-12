@@ -1,7 +1,9 @@
 import axios from "axios"
+import apiClient from "../axios";
+
 
 export const getAllProducts = async () => {
-  const response = await axios.get("/api/product/getall")
+  const response = await apiClient.get("/api/product/getall")
   return response
 }
 
