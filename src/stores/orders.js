@@ -24,10 +24,10 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await createOrder(token, orderData)
-            if (response.data.success) {
+            if (response.success) {
                 return response
             }
-            throw new Error(response.data.message || 'Tạo đơn hàng thất bại!')
+            throw new Error(response.message || 'Tạo đơn hàng thất bại!')
         } catch (error) {
             console.error("Create order error:", error.message)
             throw error
@@ -39,8 +39,8 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await getAllOrders(token)
-            if (response.data.success) {
-                orders.value = response.data.data || []
+            if (response.success) {
+                orders.value = response.data || []
             }
             return response
         } catch (error) {
@@ -54,8 +54,8 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await getOrdersByUserId(userId, token)
-            if (response.data.success) {
-                orders.value = response.data.data || []
+            if (response.success) {
+                orders.value = response.data || []
             }
             return response
         } catch (error) {
@@ -69,8 +69,8 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await getOrderById(orderId, token)
-            if (response.data.success) {
-                currentOrder.value = response.data.data
+            if (response.success) {
+                currentOrder.value = response.data
             }
             return response
         } catch (error) {
@@ -84,8 +84,8 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await getOrderDetailsByOrderId(orderId, token)
-            if (response.data.success) {
-                currentOrderDetails.value = response.data.data || []
+            if (response.success) {
+                currentOrderDetails.value = response.data || []
             }
             return response
         } catch (error) {
@@ -99,10 +99,10 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await getOrderDetailById(orderDetailId, token)
-            if (response.data.success) {
+            if (response.success) {
                 return response
             }
-            throw new Error(response.data.message || 'Lấy chi tiết đơn hàng thất bại!')
+            throw new Error(response.message || 'Lấy chi tiết đơn hàng thất bại!')
         } catch (error) {
             console.error("Get order detail by id error:", error.message)
             throw error
@@ -114,7 +114,7 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await updateOrderDetail(orderDetailId, token, orderDetailData)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload order details if needed
                 if (currentOrder.value) {
                     await getOrderDetailsByOrderIdStore(currentOrder.value.order_id)
@@ -132,7 +132,7 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await deleteOrderDetail(orderDetailId, token)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload order details if needed
                 if (currentOrder.value) {
                     await getOrderDetailsByOrderIdStore(currentOrder.value.order_id)
@@ -150,7 +150,7 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await updateOrderStatus(orderId, token, 'CANCELLED')
-            if (response.data.success) {
+            if (response.success) {
                 // Reload orders list
                 const userId = authStore.userId
                 if (userId) {
@@ -169,7 +169,7 @@ export const useOrderStore = defineStore("order", () => {
         const token = authStore.accessToken
         try {
             const response = await updateOrderStatus(orderId, token, status)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload orders list
                 await getAllOrdersStore()
             }
@@ -187,13 +187,13 @@ export const useOrderStore = defineStore("order", () => {
             console.log('🔄 Updating shipping status:', { orderId, shippingStatus })
             const response = await updateOrderShippingStatus(orderId, token, shippingStatus)
             console.log('📦 Response from backend:', response.data)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload orders list
                 await getAllOrdersStore()
                 // Kiểm tra giá trị sau khi reload
                 const updatedOrder = orders.value.find(o => o.order_id === orderId)
                 if (updatedOrder) {
-                    console.log('✅ Order after reload:', {
+                    console.log(' Order after reload:', {
                         orderId: updatedOrder.order_id,
                         shipping_status: updatedOrder.shipping_status,
                         status: updatedOrder.status
@@ -225,7 +225,7 @@ export const useOrderStore = defineStore("order", () => {
         try {
             const response = await deleteOrder(orderId, token)
             // Kiểm tra response - có thể backend trả về success hoặc không có success field
-            if (response.data?.success !== false) {
+            if (response?.success !== false) {
                 // Reload orders list
                 const userId = authStore.userId
                 if (userId) {

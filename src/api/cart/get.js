@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 
 export const getCartOfUser = async (userId, token) => {
-    const response = await axios.get(`/api/cart/get-cart-of-user/${userId}`, {
+    const response = await apiClient.get(`/api/cart/get-cart-of-user/${userId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -12,7 +12,7 @@ export const getCartOfUser = async (userId, token) => {
 
 
 export const getCartDetail = async (cartId, token) => {
-    const response = await axios.get(`/api/cartdetail/get-cart-detail/${cartId}`, {
+    const response = await apiClient.get(`/api/cartdetail/get-cart-detail/${cartId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

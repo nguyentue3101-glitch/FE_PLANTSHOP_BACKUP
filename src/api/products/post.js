@@ -1,7 +1,7 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 export const addProductsAPI = async (token, formData) => {
-    const response = await axios.post("/api/product/add", formData, {
+    const response = await apiClient.post("/api/product/add", formData, {
         headers: {
             Authorization: `Bearer ${token}`,
             
@@ -12,7 +12,7 @@ export const addProductsAPI = async (token, formData) => {
 
 
 export const addCategories = async (token, categoryData) => {
-    const response = await axios.post("/api/category/add", categoryData, {
+    const response = await apiClient.post("/api/category/add", categoryData, {
         headers: {
             Authorization: `Bearer ${token}`,
             

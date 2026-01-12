@@ -100,10 +100,10 @@ export const useAuthStore = defineStore("auth", () => {
   const loginUsers = async (email, password) => {
     try {
       const response = await loginUser(email, password)
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Đăng nhập thất bại')
+      if (!response.success) {
+        throw new Error(response.message || 'Đăng nhập thất bại')
       }
-      saveTokens(response.data.data.accessToken, response.data.data.refreshToken)
+      saveTokens(response.data.accessToken, response.data.refreshToken)
     } catch (error) {
       console.error(error)
       throw error
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore("auth", () => {
       const { loginWithGoogle: loginGoogleAPI } = await import('../api/auth/post')
       const response = await loginGoogleAPI(code)
       
-      saveTokens(response.data.data.accessToken, response.data.data.refreshToken)
+      saveTokens(response.data.accessToken, response.data.refreshToken)
       return response
     } catch (error) {
       console.error(error)

@@ -1,7 +1,8 @@
-import axios from "axios"
+import apiClient from "../axios";
+
 
 export const getInfoUser = async(token)=>{
-    const response = await axios.get("/api/user/get-user", {
+    const response = await apiClient.get("/api/user/get-user", {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -10,7 +11,7 @@ export const getInfoUser = async(token)=>{
 }
 
 export const getAllUser = async(token)=>{
-    const response = await axios.get("/api/user/getall", {
+    const response = await apiClient.get("/api/user/getall", {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -20,7 +21,7 @@ export const getAllUser = async(token)=>{
 }
 
 export const getAllUserDeleted = async(token) => {
-    const response = await axios.get("/api/user/getall-deleted",{
+    const response = await apiClient.get("/api/user/getall-deleted",{
         headers:{
             Authorization: `Bearer ${token}`,
         },

@@ -1,7 +1,7 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const changePassword = async (oldPassword, newPassword, token) => {
-  const response = await axios.put("/api/auth/change-password", {
+  const response = await apiClient.put("/api/auth/change-password", {
     oldPassword,
     newPassword
   }, {

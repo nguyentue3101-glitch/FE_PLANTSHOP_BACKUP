@@ -1,7 +1,7 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const updateInfoUser = async(token, userId, userData)=>{
-    const response = await axios.put(`/api/user/update/${userId}`, userData, {
+    const response = await apiClient.put(`/api/user/update/${userId}`, userData, {
         headers:{
             Authorization:`Bearer ${token}`,
         }
@@ -10,7 +10,7 @@ export const updateInfoUser = async(token, userId, userData)=>{
 }
 
 export const restoreUser = async(token, userId)=>{
-    const response = await axios.put(`/api/user/restore/${userId}`, {}, {
+    const response = await apiClient.put(`/api/user/restore/${userId}`, {}, {
         headers:{
             Authorization:`Bearer ${token}`,
         }

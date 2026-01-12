@@ -1,7 +1,7 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 export const removeProductFromCart = async (userId, productId, token) => {
-    const response = await axios.delete(
+    const response = await apiClient.delete(
         `/api/cartdetail/remove-product/${userId}/${productId}`,
         {
             headers: {

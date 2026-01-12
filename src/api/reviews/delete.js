@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 // Xóa đánh giá
 export const deleteReview = async (reviewId, token) => {
-    const response = await axios.delete(`/api/reviews/${reviewId}`, {
+    const response = await apiClient.delete(`/api/reviews/${reviewId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

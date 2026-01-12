@@ -13,8 +13,8 @@ export const useUserStore = defineStore("user", () => {
   const getAllUsers = async (token) => {
     try {
       const response = await getAllUser(token)
-      if (response.data.success) {
-        allUsers.value = response.data.data
+      if (response.success) {
+        allUsers.value = response.data
       }
     } catch (error) {
      console.error(error)
@@ -24,8 +24,8 @@ export const useUserStore = defineStore("user", () => {
   const getAllDeleted = async(token) =>{
     try {
       const response = await getAllUserDeleted(token)
-      if(response.data.success){
-        allDeleted.value = response.data.data
+      if(response.success){
+        allDeleted.value = response.data
       }
     } catch (error) {
       console.error(error)
@@ -36,8 +36,8 @@ export const useUserStore = defineStore("user", () => {
   const getInfo = async (token) => {
     try {
       const response = await getInfoUser(token)
-      if (response.data.success) {
-        userInfo.value = response.data.data
+      if (response.success) {
+        userInfo.value = response.data
       }
     } catch (error) {
       console.error(error)
@@ -48,7 +48,7 @@ export const useUserStore = defineStore("user", () => {
   const updateInfoUsers = async (token, userId, userData) => {
     try {
       const response = await updateInfoUser(token, userId, userData)
-      if (response.data.success) {
+      if (response.success) {
         userInfo.value = { ...userInfo.value}
       }
       return response

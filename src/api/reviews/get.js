@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 // Lấy tất cả đánh giá (cho admin)
 export const getAllReviews = async (token) => {
-    const response = await axios.get("/api/reviews/get-all", {
+    const response = await apiClient.get("/api/reviews/get-all", {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -12,13 +12,13 @@ export const getAllReviews = async (token) => {
 
 // Lấy đánh giá theo productId
 export const getReviewsByProductId = async (productId) => {
-    const response = await axios.get(`/api/reviews/product/${productId}`);
+    const response = await apiClient.get(`/api/reviews/product/${productId}`);
     return response;
 }
 
 // Lấy đánh giá theo userId
 export const getReviewsByUserId = async (userId, token) => {
-    const response = await axios.get(`/api/reviews/user/${userId}`, {
+    const response = await apiClient.get(`/api/reviews/user/${userId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -28,7 +28,7 @@ export const getReviewsByUserId = async (userId, token) => {
 
 // Lấy đánh giá theo reviewId
 export const getReviewById = async (reviewId, token) => {
-    const response = await axios.get(`/api/reviews/${reviewId}`, {
+    const response = await apiClient.get(`/api/reviews/${reviewId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -37,7 +37,7 @@ export const getReviewById = async (reviewId, token) => {
 }
 
 export const getAllReviewsDeleted = async (token) => {
-    const response = await axios.get("/api/reviews/get-all-deleted", {
+    const response = await apiClient.get("/api/reviews/get-all-deleted", {
         headers: {
             Authorization: `Bearer ${token}`,
         },

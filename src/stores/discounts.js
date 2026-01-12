@@ -13,8 +13,8 @@ export const useDiscountStore = defineStore("discount", () => {
   const getAllDiscounts = async () => {
     try {
       const res = await getAllDiscount()
-      if (res.data.success) {
-        discounts.value = res.data.data
+      if (res.success) {
+        discounts.value = res.data
       }
     } catch (error) {
       console.error("Get discount error:", error.message)
@@ -24,8 +24,8 @@ export const useDiscountStore = defineStore("discount", () => {
    const getAllDiscountsDeleted = async (token) => {
       try {
         const response = await getAllDiscountDeleted(token)
-        if (response.data.success) {
-          allDeleted.value = response.data.data
+        if (response.success) {
+          allDeleted.value = response.data
         }
       } catch (error) {
         console.error(error)
@@ -36,7 +36,7 @@ export const useDiscountStore = defineStore("discount", () => {
   const addDiscounts = async (token, discountData) => {
     try {
       const response = await addDiscount(token, discountData)
-      if (response.data.success) {
+      if (response.success) {
         discounts.value = { ...discounts.value }
       }
     } catch (error) {
@@ -67,7 +67,7 @@ export const useDiscountStore = defineStore("discount", () => {
   const updateDiscountStore = async (token, discountId, discountData) => {
     try {
       const response = await updateDiscount(token, discountId, discountData)
-      if (response.data.success) {
+      if (response.success) {
         discounts.value = { ...discounts.value }
       }
       return response

@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 // Lấy tất cả đơn hàng (cho admin)
 export const getAllOrders = async (token) => {
-    const response = await axios.get("/api/orders/get-all", {
+    const response = await apiClient.get("/api/orders/get-all", {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -12,7 +12,7 @@ export const getAllOrders = async (token) => {
 
 // Lấy đơn hàng theo userId (cho user)
 export const getOrdersByUserId = async (userId, token) => {
-    const response = await axios.get(`/api/orders/user/${userId}`, {
+    const response = await apiClient.get(`/api/orders/user/${userId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -22,7 +22,7 @@ export const getOrdersByUserId = async (userId, token) => {
 
 // Lấy đơn hàng theo orderId
 export const getOrderById = async (orderId, token) => {
-    const response = await axios.get(`/api/orders/${orderId}`, {
+    const response = await apiClient.get(`/api/orders/${orderId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -32,7 +32,7 @@ export const getOrderById = async (orderId, token) => {
 
 // Lấy chi tiết đơn hàng theo orderId
 export const getOrderDetailsByOrderId = async (orderId, token) => {
-    const response = await axios.get(`/api/order-details/order/${orderId}`, {
+    const response = await apiClient.get(`/api/order-details/order/${orderId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -42,7 +42,7 @@ export const getOrderDetailsByOrderId = async (orderId, token) => {
 
 // Lấy chi tiết đơn hàng theo orderDetailId
 export const getOrderDetailById = async (orderDetailId, token) => {
-    const response = await axios.get(`/api/order-details/${orderDetailId}`, {
+    const response = await apiClient.get(`/api/order-details/${orderDetailId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

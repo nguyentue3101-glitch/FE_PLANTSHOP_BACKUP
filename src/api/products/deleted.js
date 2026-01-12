@@ -1,7 +1,8 @@
-import axios from "axios"
+import apiClient from "../axios";
+
 
 export const deleteProducts = async (productId, token) => {
-  const response = await axios.delete(`/api/product/delete/${productId}`, {
+  const response = await apiClient.delete(`/api/product/delete/${productId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     }
@@ -9,7 +10,7 @@ export const deleteProducts = async (productId, token) => {
   return response
 }
 export const deleteCategories = async (categoryId, token) => {
-  const response = await axios.delete(`/api/category/delete/${categoryId}`, {
+  const response = await apiClient.delete(`/api/category/delete/${categoryId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     }

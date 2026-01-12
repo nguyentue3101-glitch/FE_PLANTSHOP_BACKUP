@@ -1,7 +1,7 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 export const addProductToCart = async (userId, productId, quantity, token) => {
-    const response = await axios.post(
+    const response = await apiClient.post(
         `/api/cartdetail/add-product/${userId}/${productId}/${quantity}`,
         null,
         {

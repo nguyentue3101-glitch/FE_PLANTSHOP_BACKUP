@@ -1,7 +1,7 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const restorProduct = async(token, productId)=>{
-    const response = await axios.put(`/api/product/restore/${productId}`, {}, {
+    const response = await apiClient.put(`/api/product/restore/${productId}`, {}, {
         headers:{
             Authorization:`Bearer ${token}`,
         }
@@ -10,7 +10,7 @@ export const restorProduct = async(token, productId)=>{
 }
 
 export const updateProduct = async(token, productId, productData)=>{
-    const response = await axios.put(`/api/product/update/${productId}`, productData, {
+    const response = await apiClient.put(`/api/product/update/${productId}`, productData, {
         headers:{
             Authorization:`Bearer ${token}`,
             'Content-Type': 'multipart/form-data'
@@ -20,7 +20,7 @@ export const updateProduct = async(token, productId, productData)=>{
 }
 
 export const restorCategory = async(token, categoryId)=>{
-    const response = await axios.put(`/api/category/restore/${categoryId}`, {}, {
+    const response = await apiClient.put(`/api/category/restore/${categoryId}`, {}, {
         headers:{
             Authorization:`Bearer ${token}`,
         }
@@ -29,7 +29,7 @@ export const restorCategory = async(token, categoryId)=>{
 }
 
 export const updateCategory = async(token, categoryId, categoryData)=>{
-    const response = await axios.put(`/api/category/update/${categoryId}`, categoryData, {
+    const response = await apiClient.put(`/api/category/update/${categoryId}`, categoryData, {
         headers:{
             Authorization:`Bearer ${token}`,
         }

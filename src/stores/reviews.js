@@ -26,14 +26,14 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await createReview(token, reviewData)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload reviews for the product if needed
                 if (reviewData.product_id) {
                     await getReviewsByProductIdStore(reviewData.product_id)
                 }
                 return response
             }
-            throw new Error(response.data.message || 'Tạo đánh giá thất bại!')
+            throw new Error(response.message || 'Tạo đánh giá thất bại!')
         } catch (error) {
             console.error("Create review error:", error.message)
             throw error
@@ -45,8 +45,8 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await getAllReviews(token)
-            if (response.data.success) {
-                reviews.value = response.data.data || []
+            if (response.success) {
+                reviews.value = response.data || []
             }
             return response
         } catch (error) {
@@ -59,8 +59,8 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await getAllReviewsDeleted(token)
-            if (response.data.success) {
-                reviewsDeleted.value = response.data.data || []
+            if (response.success) {
+                reviewsDeleted.value = response.data || []
             }
             return response
         } catch (error) {
@@ -73,8 +73,8 @@ export const useReviewStore = defineStore("review", () => {
     const getReviewsByProductIdStore = async (productId) => {
         try {
             const response = await getReviewsByProductId(productId)
-            if (response.data.success) {
-                productReviews.value = response.data.data || []
+            if (response.success) {
+                productReviews.value = response.data || []
             }
             return response
         } catch (error) {
@@ -88,8 +88,8 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await getReviewsByUserId(userId, token)
-            if (response.data.success) {
-                userReviews.value = response.data.data || []
+            if (response.success) {
+                userReviews.value = response.data || []
             }
             return response
         } catch (error) {
@@ -103,8 +103,8 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await getReviewById(reviewId, token)
-            if (response.data.success) {
-                currentReview.value = response.data.data
+            if (response.success) {
+                currentReview.value = response.data
             }
             return response
         } catch (error) {
@@ -117,14 +117,14 @@ export const useReviewStore = defineStore("review", () => {
     const updateReviewStore = async (reviewId, reviewData) => {
         const token = authStore.accessToken
         try {
-            console.log('📤 Store: Gọi API UPDATE review:', {
+            console.log(' Store: Gọi API UPDATE review:', {
                 reviewId,
                 endpoint: `/api/reviews/${reviewId}`,
                 reviewData
             })
             const response = await updateReview(reviewId, token, reviewData)
-            console.log('📥 Store: Response từ API UPDATE:', response.data)
-            if (response.data.success) {
+            console.log(' Store: Response từ API UPDATE:', response.data)
+            if (response.success) {
                 // Reload reviews if needed
                 if (currentReview.value?.product_id) {
                     await getReviewsByProductIdStore(currentReview.value.product_id)
@@ -132,7 +132,7 @@ export const useReviewStore = defineStore("review", () => {
             }
             return response
         } catch (error) {
-            console.error("❌ Store: Update review error:", error.message)
+            console.error(" Store: Update review error:", error.message)
             throw error
         }
     }
@@ -142,7 +142,7 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await deleteReview(reviewId, token)
-            if (response.data.success) {
+            if (response.success) {
                 // Tìm review bị xóa và chuyển sang deletedReviews
                 const deletedReview = reviews.value.find(r => r.review_id === reviewId)
                 if (deletedReview) {
@@ -167,7 +167,7 @@ export const useReviewStore = defineStore("review", () => {
         const token = authStore.accessToken
         try {
             const response = await restoreReview(reviewId, token)
-            if (response.data.success) {
+            if (response.success) {
                 // Tìm review được khôi phục và chuyển về reviews
                 const restoredReview = deletedReviews.value.find(r => r.review_id === reviewId)
                 if (restoredReview) {

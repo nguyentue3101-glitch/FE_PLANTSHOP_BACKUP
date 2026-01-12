@@ -1,7 +1,7 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const restoreDiscount = async(token, discountId)=>{
-    const response = await axios.put(`/api/discount/restore/${discountId}`, {}, {
+    const response = await apiClient.put(`/api/discount/restore/${discountId}`, {}, {
         headers:{
             Authorization:`Bearer ${token}`,
         }
@@ -10,7 +10,7 @@ export const restoreDiscount = async(token, discountId)=>{
 }
 
 export const updateDiscount = async(token, discountId, discountData)=>{
-    const response = await axios.put(`/api/discount/update/${discountId}`, discountData, {
+    const response = await apiClient.put(`/api/discount/update/${discountId}`, discountData, {
         headers:{
             Authorization:`Bearer ${token}`,
         }

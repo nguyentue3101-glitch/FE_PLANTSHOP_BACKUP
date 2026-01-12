@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 
 export const updateCartQuantity = async (userId, productId, quantity, token, selected = null) => {
@@ -6,7 +6,7 @@ export const updateCartQuantity = async (userId, productId, quantity, token, sel
     if (selected !== null) {
         url += `?selected=${selected}`
     }
-    const response = await axios.put(
+    const response = await apiClient.put(
         url,
         null, 
         {

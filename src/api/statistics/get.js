@@ -1,8 +1,8 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 
 export const getStatisticsByDate = async (year, month, day) => {
-  const response = await axios.get("/api/statistics/by-date", {
+  const response = await apiClient.get("/api/statistics/by-date", {
     params: {
       year,
       month,
@@ -19,7 +19,7 @@ export const getStatisticsByDate = async (year, month, day) => {
  * @returns {Promise} Response chứa StatisticsResponse
  */
 export const getStatisticsByMonth = async (year, month) => {
-  const response = await axios.get("/api/statistics/by-month", {
+  const response = await apiClient.get("/api/statistics/by-month", {
     params: {
       year,
       month
@@ -34,7 +34,7 @@ export const getStatisticsByMonth = async (year, month) => {
  * @returns {Promise} Response chứa StatisticsResponse
  */
 export const getStatisticsByYear = async (year) => {
-  const response = await axios.get("/api/statistics/by-year", {
+  const response = await apiClient.get("/api/statistics/by-year", {
     params: {
       year
     }
@@ -51,7 +51,7 @@ export const getStatisticsByYear = async (year) => {
  * @returns {Promise} Response chứa danh sách TopProductResponse
  */
 export const getTopProductsByDate = async (year, month, day, limit = 10) => {
-  const response = await axios.get("/api/statistics/top-products/by-date", {
+  const response = await apiClient.get("/api/statistics/top-products/by-date", {
     params: {
       year,
       month,
@@ -70,7 +70,7 @@ export const getTopProductsByDate = async (year, month, day, limit = 10) => {
  * @returns {Promise} Response chứa danh sách TopProductResponse
  */
 export const getTopProductsByMonth = async (year, month, limit = 10) => {
-  const response = await axios.get("/api/statistics/top-products/by-month", {
+  const response = await apiClient.get("/api/statistics/top-products/by-month", {
     params: {
       year,
       month,
@@ -82,7 +82,7 @@ export const getTopProductsByMonth = async (year, month, limit = 10) => {
 
 
 export const getTopProductsByYear = async (year, limit = 10) => {
-  const response = await axios.get("/api/statistics/top-products/by-year", {
+  const response = await apiClient.get("/api/statistics/top-products/by-year", {
     params: {
       year,
       limit
@@ -99,7 +99,7 @@ export const getTopProductsByYear = async (year, limit = 10) => {
  * @returns {Promise} Response chứa ProductSalesResponse
  */
 export const getTotalProductsSoldByMonth = async (year, month) => {
-  const response = await axios.get("/api/statistics/products-sold/by-month", {
+  const response = await apiClient.get("/api/statistics/products-sold/by-month", {
     params: {
       year,
       month
@@ -115,7 +115,7 @@ export const getTotalProductsSoldByMonth = async (year, month) => {
  * @returns {Promise} Response chứa ProductSalesResponse
  */
 export const getTotalProductsSoldByYear = async (year) => {
-  const response = await axios.get("/api/statistics/products-sold/by-year", {
+  const response = await apiClient.get("/api/statistics/products-sold/by-year", {
     params: {
       year
     }

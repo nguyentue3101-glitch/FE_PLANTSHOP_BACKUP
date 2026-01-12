@@ -1,7 +1,7 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const deleteDiscounts = async (discountId, token) => {
-  const response = await axios.delete(`/api/discount/delete/${discountId}`, {
+  const response = await apiClient.delete(`/api/discount/delete/${discountId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     }

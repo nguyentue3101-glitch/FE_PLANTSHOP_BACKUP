@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 // Cập nhật đánh giá
 export const updateReview = async (reviewId, token, reviewData) => {
-    const response = await axios.put(`/api/reviews/${reviewId}`, reviewData, {
+    const response = await apiClient.put(`/api/reviews/${reviewId}`, reviewData, {
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"
@@ -13,7 +13,7 @@ export const updateReview = async (reviewId, token, reviewData) => {
 
 // Khôi phục đánh giá (restore)
 export const restoreReview = async (reviewId, token) => {
-    const response = await axios.put(`/api/reviews/restore/${reviewId}`, {}, {
+    const response = await apiClient.put(`/api/reviews/restore/${reviewId}`, {}, {
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json"

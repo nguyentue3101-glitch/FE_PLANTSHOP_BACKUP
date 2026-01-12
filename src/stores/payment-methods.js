@@ -12,8 +12,8 @@ export const usePaymentMethodStore = defineStore("paymentMethod", () => {
         const token = authStore.accessToken
         try {
             const response = await getAllPaymentMethodsAPI(token)
-            if (response.data.success) {
-                paymentMethods.value = response.data.data || []
+            if (response.success) {
+                paymentMethods.value = response.data || []
             }
             return response
         } catch (error) {

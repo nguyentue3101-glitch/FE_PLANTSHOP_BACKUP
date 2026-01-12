@@ -1,7 +1,7 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 export const addDiscount= async (token, discountData) => {
-    const response = await axios.post("/api/discount/add", discountData, {
+    const response = await apiClient.post("/api/discount/add", discountData, {
         headers: {
             Authorization: `Bearer ${token}`,
             

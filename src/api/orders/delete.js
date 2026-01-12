@@ -1,8 +1,8 @@
-import axios from "axios";
+import apiClient from "../axios";
 
 // Xóa chi tiết đơn hàng
 export const deleteOrderDetail = async (orderDetailId, token) => {
-    const response = await axios.delete(`/api/order-details/${orderDetailId}`, {
+    const response = await apiClient.delete(`/api/order-details/${orderDetailId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -12,7 +12,7 @@ export const deleteOrderDetail = async (orderDetailId, token) => {
 
 // Xóa đơn hàng
 export const deleteOrder = async (orderId, token) => {
-    const response = await axios.delete(`/api/orders/${orderId}`, {
+    const response = await apiClient.delete(`/api/orders/${orderId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

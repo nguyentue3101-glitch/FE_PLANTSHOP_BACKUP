@@ -113,9 +113,9 @@ export const usePaymentStore = defineStore("payment", () => {
             
             try {
                 const existingPayment = await getPaymentByOrderId(orderId, token)
-                if (existingPayment.data.success && existingPayment.data.data) {
+                if (existingPayment.success && existingPayment.data) {
                     // Payment đã tồn tại, update thay vì tạo mới
-                    const payment = existingPayment.data.data
+                    const payment = existingPayment.data
                     console.log('Payment already exists. Payment object:', payment)
                     
                     // Thử nhiều cách để lấy payment_id
@@ -140,17 +140,17 @@ export const usePaymentStore = defineStore("payment", () => {
 
             // Tạo payment mới
             const response = await createPaymentAPI(token, orderId, paymentData)
-            if (response.data.success) {
+            if (response.success) {
                 return response
             }
-            throw new Error(response.data.message || 'Tạo payment thất bại!')
+            throw new Error(response.message || 'Tạo payment thất bại!')
         } catch (error) {
             // Nếu lỗi là payment đã tồn tại, thử update
-            if (error.response?.status === 409 || error.response?.data?.message?.includes('already exists')) {
+            if (error.response?.status === 409 || error.response?.message?.includes('already exists')) {
                 try {
                     const existingPayment = await getPaymentByOrderId(orderId, token)
-                    if (existingPayment.data.success && existingPayment.data.data) {
-                        const paymentId = existingPayment.data.data.payment_id || existingPayment.data.data.id
+                    if (existingPayment.success && existingPayment.data) {
+                        const paymentId = existingPayment.data.payment_id || existingPayment.data.id
                         console.log('Payment was created by backend, updating status:', paymentId)
                         return await updatePaymentStatusAPI(token, paymentId, paymentData.status)
                     }
@@ -170,9 +170,9 @@ export const usePaymentStore = defineStore("payment", () => {
             // Kiểm tra xem payment đã tồn tại chưa
             try {
                 const existingPayment = await getPaymentByOrderId(orderId, token)
-                if (existingPayment.data.success && existingPayment.data.data) {
+                if (existingPayment.success && existingPayment.data) {
                     // Payment đã tồn tại, update
-                    const paymentId = existingPayment.data.data.payment_id || existingPayment.data.data.id
+                    const paymentId = existingPayment.data.payment_id || existingPayment.data.id
                     console.log('Payment exists, updating payment:', paymentId)
                     return await updatePaymentStatusAPI(token, paymentId, paymentData.status)
                 }
@@ -183,10 +183,10 @@ export const usePaymentStore = defineStore("payment", () => {
 
             // Tạo payment mới
             const response = await createPaymentAPI(token, orderId, paymentData)
-            if (response.data.success) {
+            if (response.success) {
                 return response
             }
-            throw new Error(response.data.message || 'Tạo payment thất bại!')
+            throw new Error(response.message || 'Tạo payment thất bại!')
         } catch (error) {
             console.error("Create or update payment error:", error.message)
             throw error
@@ -198,8 +198,8 @@ export const usePaymentStore = defineStore("payment", () => {
         const token = authStore.accessToken
         try {
             const response = await getPaymentByOrderId(orderId, token)
-            if (response.data.success) {
-                currentPayment.value = response.data.data
+            if (response.success) {
+                currentPayment.value = response.data
             }
             return response
         } catch (error) {
@@ -213,8 +213,8 @@ export const usePaymentStore = defineStore("payment", () => {
         const token = authStore.accessToken
         try {
             const response = await getPaymentById(paymentId, token)
-            if (response.data.success) {
-                currentPayment.value = response.data.data
+            if (response.success) {
+                currentPayment.value = response.data
             }
             return response
         } catch (error) {
@@ -228,7 +228,7 @@ export const usePaymentStore = defineStore("payment", () => {
         const token = authStore.accessToken
         try {
             const response = await updatePaymentStatusAPI(token, paymentId, status)
-            if (response.data.success) {
+            if (response.success) {
                 // Reload payment if needed
                 if (currentPayment.value && currentPayment.value.payment_id === paymentId) {
                     await getPaymentByIdStore(paymentId)
@@ -248,8 +248,8 @@ export const usePaymentStore = defineStore("payment", () => {
         const token = authStore.accessToken
         try {
             const response = await getAllPayments(token)
-            if (response.data.success) {
-                payments.value = response.data.data || []
+            if (response.success) {
+                payments.value = response.data || []
             }
             return response
         } catch (error) {

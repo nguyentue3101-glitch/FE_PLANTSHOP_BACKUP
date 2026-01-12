@@ -15,16 +15,16 @@ export const useCartStore = defineStore("cart", () => {
     const token = authStore.accessToken
     try {
       const cartResponse = await getCartOfUser(userId, token)
-      if (cartResponse.data.success) {
-        cartId.value = cartResponse.data.data?.cart_id
+      if (cartResponse.success) {
+        cartId.value = cartResponse.data?.cart_id
       }
       if (!cartId.value) {
         cartItems.value = []
         return
       }
       const detailResponse = await getCartDetail(cartId.value, token)
-      if (detailResponse.data.success) {
-        const data = detailResponse.data.data || []
+      if (detailResponse.success) {
+        const data = detailResponse.data || []
         cartItems.value = Array.isArray(data)
           ? data.map((item) => {
               const product = item.products
@@ -63,7 +63,7 @@ export const useCartStore = defineStore("cart", () => {
     const token = authStore.accessToken
     const response = await addProductToCart(userId, productId, quantity, token)
 
-    if (response.data.success) {
+    if (response.success) {
       await loadCartFromBackend(userId)
     }
 
@@ -83,7 +83,7 @@ export const useCartStore = defineStore("cart", () => {
     const token = authStore.accessToken
     const response = await removeProductFromCart(userId, productId, token)
 
-    if (response.data.success) {
+    if (response.success) {
       await loadCartFromBackend(userId)
     }
 
@@ -107,7 +107,7 @@ export const useCartStore = defineStore("cart", () => {
     const token = authStore.accessToken
     const response = await updateCartQuantity(userId, productId, quantity, token, selected)
 
-    if (response.data.success) {
+    if (response.success) {
       await loadCartFromBackend(userId)
     }
 

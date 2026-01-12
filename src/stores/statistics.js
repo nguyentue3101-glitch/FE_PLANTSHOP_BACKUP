@@ -16,12 +16,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
             const response = await getTotalProductsSoldByMonth(year, month)
             console.log(' Total Products Sold By Month Response:', response)
             console.log(' Response data:', response.data)
-            console.log(' Response data.data:', response.data?.data)
+            console.log(' Response data.data:', response?.data)
             
             let total = 0
             
-            if (response.data?.success && response.data?.data) {
-                const data = response.data.data
+            if (response?.success && response?.data) {
+                const data = response.data
                 if (data && typeof data === 'object') {
                     total = data.totalQuantitySold || 0
                 }
@@ -49,12 +49,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
             const response = await getTotalProductsSoldByYear(year)
             console.log(' Total Products Sold By Year Response:', response)
             console.log(' Response data:', response.data)
-            console.log(' Response data.data:', response.data?.data)
+            console.log(' Response data.data:', response?.data)
             
             let total = 0
             
-            if (response.data?.success && response.data?.data) {
-                const data = response.data.data
+            if (response?.success && response?.data) {
+                const data = response.data
                 if (data && typeof data === 'object') {
                     total = data.totalQuantitySold || 0
                 }

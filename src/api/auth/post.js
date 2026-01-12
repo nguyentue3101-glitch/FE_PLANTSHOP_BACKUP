@@ -1,4 +1,4 @@
-import axios from "axios"
+import apiClient from "../axios";
 
 export const registerUser = async (email, username, password, otpCode, role = null)=>{
   const requestBody = {
@@ -11,7 +11,7 @@ export const registerUser = async (email, username, password, otpCode, role = nu
     requestBody.role = role
   }
   // Không gửi token vì đây là đăng ký, user chưa có tài khoản
-  const response = await axios.post("/api/auth/register", requestBody)
+  const response = await apiClient.post("/api/auth/register", requestBody)
   return response
 }
 
@@ -19,7 +19,7 @@ export const registerUser = async (email, username, password, otpCode, role = nu
 export const sendOtp = async (username, email, password) => {
   try {
     // Không gửi token vì đây là bước đầu của đăng ký, user chưa có tài khoản
-    const response = await axios.post("/api/auth/send-otp-register", { 
+    const response = await apiClient.post("/api/auth/send-otp-register", { 
       username, 
       email, 
       password 
@@ -37,13 +37,13 @@ export const sendOtp = async (username, email, password) => {
 
 // Xác thực OTP (optional)
 export const verifyOtp = async (email, otpCode) => {
-  const response = await axios.post("/api/auth/verify-otp", { email, otpCode })
+  const response = await apiClient.post("/api/auth/verify-otp", { email, otpCode })
   return response
 }
 
 
 export const loginUser = async (email, password) => {
-  const response = await axios.post("/api/auth/login", {
+  const response = await apiClient.post("/api/auth/login", {
     email,
     password,
   })
@@ -51,7 +51,7 @@ export const loginUser = async (email, password) => {
 }
 
 export const refreshToken = async (token)=>{
-  const response = await axios.post("/api/auth/refresh", null, {
+  const response = await apiClient.post("/api/auth/refresh", null, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -73,7 +73,7 @@ export const isTokenExpired = (token) => {
 }
 
 export const logoutUser = async (token) => {
-  const response = await axios.post("/api/auth/logout", null, {
+  const response = await apiClient.post("/api/auth/logout", null, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -84,7 +84,7 @@ export const logoutUser = async (token) => {
 // Google login với code từ Google OAuth callback
 export const loginWithGoogle = async (code) => {
   try {
-    const response = await axios.post("/api/auth/google", {
+    const response = await apiClient.post("/api/auth/google", {
       code: code
     })
     console.log('API response status:', response.status)
@@ -98,7 +98,7 @@ export const loginWithGoogle = async (code) => {
 // Gửi OTP cho quên mật khẩu
 export const sendOtpForForgotPassword = async (email) => {
   try {
-    const response = await axios.post("/api/auth/forgot-password/send-otp", { email })
+    const response = await apiClient.post("/api/auth/forgot-password/send-otp", { email })
     return response
   } catch (error) {
     console.error('Send OTP for forgot password error:', error)
@@ -109,7 +109,7 @@ export const sendOtpForForgotPassword = async (email) => {
 // Reset password với OTP
 export const resetPasswordWithOtp = async (email, otpCode, newPassword) => {
   try {
-    const response = await axios.post("/api/auth/forgot-password/reset", {
+    const response = await apiClient.post("/api/auth/forgot-password/reset", {
       email,
       otpCode,
       newPassword

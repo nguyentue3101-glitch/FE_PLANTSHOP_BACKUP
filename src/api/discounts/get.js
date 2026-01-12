@@ -1,11 +1,11 @@
-import axios from "axios"
+import apiClient from "../axios";
 export const getAllDiscount = async()=>{
-    const response = await axios.get("/api/discount/getall")
+    const response = await apiClient.get("/api/discount/getall")
     return response
 
 }
 export const getAllDiscountDeleted = async(token) => {
-    const response = await axios.get("/api/discount/getall-deleted",{
+    const response = await apiClient.get("/api/discount/getall-deleted",{
         headers:{
             Authorization: `Bearer ${token}`,
         },
