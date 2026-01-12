@@ -20,27 +20,27 @@ export default defineConfig({
     },
   },
 
-  server:{
-    open:true,
-    port:3000,
-    proxy: {
-      '/api': {
-        target: 'https://be-plantshop.onrender.com',
-        changeOrigin: true,
-        secure: false,
-      },
-      // Proxy cho location API (vnappmob.com) để tránh lỗi CORS
-    //  '/provinces-api': {
-    //     target: 'https://provinces.open-api.vn',
-    //     changeOrigin: true,
-    //     secure: false,
-    //     rewrite: (path) => path.replace(/^\/provinces-api/, '/api/v1'),
-    //     configure: (proxy) => {
-    //       proxy.on('error', (err) => {
-    //         console.log('Proxy error:', err)
-    //       })
-    //     }
-    //   }
-    }
-  }
+  // server:{
+  //   open:true,
+  //   port:3000,
+  //   proxy: {
+  //     '/api': {
+  //       target: 'https://be-plantshop.onrender.com',
+  //       changeOrigin: true,
+  //       secure: false,
+  //     },
+  //     // Proxy cho location API (vnappmob.com) để tránh lỗi CORS
+  //   //  '/provinces-api': {
+  //   //     target: 'https://provinces.open-api.vn',
+  //   //     changeOrigin: true,
+  //   //     secure: false,
+  //   //     rewrite: (path) => path.replace(/^\/provinces-api/, '/api/v1'),
+  //   //     configure: (proxy) => {
+  //   //       proxy.on('error', (err) => {
+  //   //         console.log('Proxy error:', err)
+  //   //       })
+  //   //     }
+  //   //   }
+  //   }
+  // }
 })
