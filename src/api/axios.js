@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-  baseURL: 'https://be-plantshop.onrender.com/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL||'http://localhost:1234/api',
   headers: {
     'Content-Type': 'application/json'
   }
