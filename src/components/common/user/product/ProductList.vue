@@ -75,8 +75,9 @@
     <LoginRequiredModal :show-modal="showLoginModal" message="Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!"
         @close="closeLoginModal" @confirm="confirmLogin" @update:show-modal="showLoginModal = $event" />
 </template>
-<style>
-@keyframes cartBounce {
+<!-- khi thêm sản phẩm vào giỏ hàng sẽ rung nhẹ -->
+<!-- <style>
+/* @keyframes cartBounce {
 
     0%,
     100% {
@@ -98,15 +99,15 @@
 
 .cart-bounce {
     animation: cartBounce 0.6s ease-in-out;
-}
-</style>
+} */
+</style> -->
 <script setup>
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useReviewStore } from '@/stores/reviews'
 import { ref, watch, computed } from 'vue'
-import { useCartAnimation } from '@/composables/useCartAnimation'
+// import { useCartAnimation } from '@/composables/useCartAnimation'
 import { useCartValidation } from '@/composables/useCartValidation'
 import { useLoginModal } from '@/composables/useLoginModal'
 import NotificationModal from '@/components/common/admin/NotificationModal.vue'
@@ -127,7 +128,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const reviewStore = useReviewStore()
-const { createFlyAnimation } = useCartAnimation()
+// const { createFlyAnimation } = useCartAnimation()
 const { validateCartQuantity } = useCartValidation()
 const { showLoginModal, openLoginModal, closeLoginModal, confirmLogin } = useLoginModal()
 
@@ -146,7 +147,7 @@ const productRatings = computed(() => {
 const loadProductRatings = async (products) => {
     if (!products || products.length === 0) return
 
-    // Lấy reviews cho từng sản phẩm (API công khai, không cần token)
+    // Lấy reviews cho từng sản phẩm 
     const ratingPromises = products.map(async (product) => {
         const productId = product.product_id
         if (!productId) return
@@ -162,6 +163,7 @@ const loadProductRatings = async (products) => {
                         average: parseFloat(average),
                         count: reviews.length
                     }
+                    console.log("prodictRatingsMap", productRatingsMap.value)
                 }
             }
         } catch (error) {
@@ -188,7 +190,7 @@ const handleViewDetail = (product) => {
 }
 
 // Xử lý thêm vào giỏ hàng
-const handleAddToCart = async (product, event) => {
+const handleAddToCart = async (product) => {
     // Kiểm tra sản phẩm còn hàng
     if (product.out_of_stock === 1 || product.out_of_stock === true) {
         alert('Sản phẩm này đã hết hàng!')
@@ -219,9 +221,9 @@ const handleAddToCart = async (product, event) => {
         }
 
         // Chỉ tạo animation khi tất cả kiểm tra đều pass
-        if (event) {
-            createFlyAnimation(event)
-        }
+        // if (event) {
+        //     createFlyAnimation(event)
+        // }
 
         await cartStore.addToCart(product, 1)
         // Bỏ thông báo thành công - chỉ dùng animation

@@ -51,6 +51,12 @@
                     {{ getPaymentStatusText(order) }}
                 </span>
             </div>
+            <div v-if="order.deposit?.paid">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-600">Đã đặt cọc:</span>
+                    <span class="font-semibold text-green-600">{{ formatPrice(order.deposit.amount) }}</span>
+                </div>
+            </div>
             <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-600">Trạng thái giao hàng:</span>
                 <span :class="[
@@ -96,13 +102,12 @@
             <div class="flex justify-end gap-4 text-gray-600">
                 <span>Phí vận chuyển: </span>
                 <span class="font-semibold">
-                    <span>{{ formatPrice(shippingFee) }}</span>
+                    <span>{{ formatPrice(order.shipping_fee) }}</span>
                 </span>
             </div>
             <div v-if="specialDiscountAmount > 0" class="flex justify-end gap-4 text-green-600">
                 <span>
-                    Giảm giá
-                    <span v-if="order.discount_code">({{ order.discount_code }})</span>:
+                    Giảm giá:
                 </span>
                 <span class="font-semibold">-{{ formatPrice(specialDiscountAmount) }}</span>
             </div>
@@ -125,66 +130,6 @@
 
         </div>
 
-        <!-- Deposit Information -->
-        <!-- <div v-if="order.deposit_required" class="mt-4 pt-4 border-t space-y-3">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-semibold text-gray-700">Trạng thái đặt cọc:</span>
-                <span :class="[
-                    'inline-block px-3 py-1 rounded-full text-sm font-semibold',
-                    order.deposit?.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                ]">
-                    {{ order.deposit?.paid ? 'Đã đặt cọc' : 'Chưa đặt cọc' }}
-                </span>
-            </div> -->
-
-        <!-- Nút đặt cọc (chỉ hiển thị khi chưa đặt cọc) -->
-        <!-- <div v-if="!order.deposit?.paid && order.deposit_payment">
-                <button @click="handleDepositPayment"
-                    class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition-colors cursor-pointer">
-                    Thanh toán cọc
-                </button>
-            </div> -->
-
-        <!-- Thông tin chi tiết đặt cọc (hiển thị khi đã đặt cọc) -->
-        <!-- <div v-if="order.deposit?.paid" class="bg-green-50 border-l-4 border-green-400 p-4 rounded space-y-3">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <p class="text-sm font-semibold text-green-800">Đã đặt cọc thành công</p>
-                </div>
-
-                <div class="space-y-2 text-sm">
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">Tổng giá trị đơn hàng:</span>
-                        <span class="font-semibold text-gray-800">{{ formatPrice(order.final_total) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-green-200">
-                        <span class="font-semibold text-gray-800">Số tiền còn lại phải thanh toán:</span>
-                        <span class="text-lg font-bold text-orange-600">{{ formatPrice(remainingAmount) }}</span>
-                    </div>
-                </div>
-
-                <p class="text-xs text-green-700 mt-2">
-                    Đơn hàng sẽ được xử lý trong thời gian sớm nhất. Số tiền còn lại sẽ được thanh toán khi nhận hàng.
-                </p>
-            </div> -->
-
-        <!-- Thông tin đặt cọc khi chưa đặt (hiển thị số tiền cần đặt cọc) -->
-        <!-- <div v-else-if="order.deposit" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">Số tiền cần đặt cọc:</span>
-                        <span class="font-semibold text-yellow-600">{{ formatPrice(order.deposit.amount) }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">Tổng giá trị đơn hàng:</span>
-                        <span class="font-semibold text-gray-800">{{ formatPrice(order.final_total) }}</span>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
         <!-- Action Buttons -->
         <div class="mt-4 pt-4  flex justify-end gap-3">
@@ -219,7 +164,7 @@ import { defineProps, computed, onMounted, watch, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useReviewStore } from '@/stores/reviews'
 import { usePaymentStore } from '@/stores/payments'
-import { useShippingFee } from '@/composables/useShippingFee'
+// import { useShippingFee } from '@/composables/useShippingFee'
 import { useProductStore } from '@/stores/products'
 
 
@@ -245,12 +190,12 @@ defineEmits(['cancel-order'])
 const authStore = useAuthStore()
 const reviewStore = useReviewStore()
 const paymentStore = usePaymentStore()
-const { getShippingFeeFromOrder } = useShippingFee()
+// const { getShippingFeeFromOrder } = useShippingFee()
 const userReviews = ref([])
 const isLoadingReviews = ref(false)
 const paymentInfo = ref(null)
 const fullOrderInfo = ref(null)
-const isLoadingOrderInfo = ref(false)
+// const isLoadingOrderInfo = ref(false)
 
 // Kiểm tra xem có nên hiển thị đơn hàng này không
 // Chỉ áp dụng filter khi applyFilter = true (dùng trong OrderPage)
@@ -275,7 +220,7 @@ const shouldDisplayOrder = computed(() => {
     return !isConfirmedAndDelivered && !isCancelled && !isShippingCancelled
 })
 
-// Load user reviews to check if all products are reviewed
+// lấy đánh giá nếu đơn đã giao
 const loadUserReviews = async () => {
     const userId = authStore.userId
     if (!userId || props.order.shipping_status !== 'DELIVERED') return
@@ -325,49 +270,9 @@ watch(() => props.order.order_id, () => {
     }
 }, { immediate: true })
 
-// Load full order info nếu thiếu thông tin shipping
-const loadFullOrderInfo = async () => {
-    // Kiểm tra xem đã có đủ thông tin shipping chưa
-    const hasShippingInfo = props.order.shipping_username ||
-        props.order.shipping_phone ||
-        props.order.shipping_address ||
-        props.order.user?.username ||
-        props.order.user?.phone_number ||
-        props.order.user?.address
-
-    if (hasShippingInfo) {
-        return // Đã có thông tin, không cần load
-    }
-
-    if (isLoadingOrderInfo.value || fullOrderInfo.value) {
-        return // Đang load hoặc đã load rồi
-    }
 
 
-
-    // Nếu có user_id, thử load user info
-    if (props.order.user_id && authStore.accessToken) {
-        try {
-            const { useUserStore } = await import('@/stores/user')
-            const userStore = useUserStore()
-            await userStore.getInfo(authStore.accessToken)
-            if (userStore.userInfo && userStore.userInfo.user_id === props.order.user_id) {
-                // Tạo fullOrderInfo từ user info
-                fullOrderInfo.value = {
-                    ...props.order,
-                    user: userStore.userInfo
-                }
-                return
-            }
-        } catch (error) {
-            console.error('❌ OrderCard - Error loading user info:', error)
-        }
-    }
-
-    // Nếu không load được user info, không gọi API getOrderById vì nó không có thông tin shipping
-}
-
-// Load product deleted info nếu thiếu
+// Lấy danh sách sản phẩm đã bị xóa nhưng từng mua
 const loadMissingProducts = async () => {
     if (!props.order.order_details) return
     for (const orderDetail of props.order.order_details) {
@@ -389,10 +294,9 @@ onMounted(async () => {
     if (props.order.shipping_status === 'DELIVERED') {
         loadUserReviews()
     }
-    // Load payment info nếu chưa có
+    // lấy thông tin giao dịch
     loadPaymentInfo()
-    // Load full order info nếu thiếu thông tin shipping
-    loadFullOrderInfo()
+ 
 })
 
 // Tính tổng số lượng sản phẩm
@@ -414,24 +318,14 @@ const totalQuantity = computed(() => {
 
 // Lấy special discount amount (discount từ mã giảm giá)
 const specialDiscountAmount = computed(() => {
-    // Nếu có auto_discount_amount và discount_amount, thì discount_amount là special discount
-    if (props.order.auto_discount_amount && props.order.discount_amount) {
-        // discount_amount có thể là tổng hoặc chỉ special, cần kiểm tra
-        // Nếu có total_discount_amount, thì special = total - auto
-        if (props.order.total_discount_amount) {
-            return props.order.total_discount_amount - (props.order.auto_discount_amount || 0)
-        }
-        // Nếu không có total_discount_amount, giả sử discount_amount là special
-        return props.order.discount_amount
-    }
-    // Nếu không có auto discount, thì discount_amount là special discount
+   
     return props.order.discount_amount || 0
 })
 
 // Tính phí ship sử dụng composable
-const shippingFee = computed(() => {
-    return getShippingFeeFromOrder(props.order, props.order.order_details)
-})
+// const shippingFee = computed(() => {
+//     return getShippingFeeFromOrder(props.order)
+// })
 
 
 
@@ -521,17 +415,6 @@ const getPaymentStatusClass = (status) => {
 
 // Lấy tên phương thức thanh toán từ order
 const getPaymentMethodName = () => {
-    // Ưu tiên lấy từ order.payment (đã được load từ getOrdersByUserIdStore)
-    if (props.order.payment?.method?.name) {
-        return props.order.payment.method.name
-    }
-    if (props.order.payment?.method_name) {
-        return props.order.payment.method_name
-    }
-    if (props.order.payment_method) {
-        return props.order.payment_method
-    }
-    // Fallback về paymentInfo nếu có
     if (paymentInfo.value?.method_name) {
         return paymentInfo.value.method_name
     }
@@ -542,6 +425,7 @@ const getPaymentMethodName = () => {
 const getPaymentStatusText = (order) => {
     // Ưu tiên lấy từ payment object
     if (order.payment?.status) {
+        console.log('order payment status:', order.payment.status)
         const statusMap = {
             'PROCESSING': 'Đang xử lý',
             'SUCCESS': 'Thành công',
@@ -550,14 +434,15 @@ const getPaymentStatusText = (order) => {
         return statusMap[order.payment.status] || order.payment.status
     }
     // Nếu không có, thử lấy từ paymentInfo
-    if (paymentInfo.value?.status) {
+    if (paymentInfo.value?.status ) {
         const statusMap = {
             'PROCESSING': 'Đang xử lý',
             'SUCCESS': 'Thành công',
-            'FAILED': 'Thất bại'
+            'FAILED': 'Đã hủy'
         }
-        return statusMap[paymentInfo.value.status] || paymentInfo.value.status
+        return statusMap[paymentInfo.value.status] 
     }
+     
     return 'Chưa xác định'
 }
 
@@ -579,31 +464,24 @@ const getShippingStatusText = (shippingStatus) => {
 
 // Load payment info nếu chưa có trong order
 const loadPaymentInfo = async () => {
-    // Ưu tiên sử dụng payment info từ order object (đã được load từ getOrdersByUserIdStore)
-    if (props.order.payment) {
-        paymentInfo.value = props.order.payment
-        return
-    }
-
-    // Nếu đã load paymentInfo rồi thì không load lại
-    if (paymentInfo.value) return
-
+  
     // Chỉ load từ API nếu order không có payment info
     try {
         const paymentResponse = await paymentStore.getPaymentByOrderIdStore(props.order.order_id)
         if (paymentResponse?.data?.success && paymentResponse?.data?.data) {
             // Xử lý cả trường hợp array và object
             const data = paymentResponse.data.data
-            if (Array.isArray(data) && data.length > 0) {
-                // Nếu là array, lấy phần tử đầu tiên
+            if (data.length > 0) {
                 paymentInfo.value = data[0]
-            } else if (typeof data === 'object') {
-                // Nếu là object, dùng trực tiếp
-                paymentInfo.value = data
+
             }
+            // } else if (typeof data === 'object') {
+            //     // Nếu là object, dùng trực tiếp
+            //     paymentInfo.value = data
+            // }
         }
     } catch (error) {
-        console.error('❌ Error loading payment info:', error)
+        console.error(' Error loading payment info:', error)
     }
 }
 

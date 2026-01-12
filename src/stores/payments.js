@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
-import { createMoMoPayment, createPayment as createPaymentAPI } from "@/api/payments/post"
+import { createMoMoPayment,  createPayment as createPaymentAPI } from "@/api/payments/post"
 import { getPaymentByOrderId, getPaymentById, getAllPayments } from "@/api/payments/get"
 import { updatePaymentStatus as updatePaymentStatusAPI } from "@/api/payments/put"
 import { useAuthStore } from "@/stores/auth"
@@ -15,28 +15,94 @@ export const usePaymentStore = defineStore("payment", () => {
         try {
             const { orderId, amount, orderInfo } = paymentData
             const response = await createMoMoPayment(orderId, amount, orderInfo)
-            
-            // Response từ apiClient đã được unwrap bởi interceptor
-            // apiClient.interceptors.response.use((response) => response.data)
-            // Vậy response ở đây chính là response.data từ axios
-            
-            // Trường hợp 1: Backend trả về { success: true, data: {...} }
+          
             if (response && response.success && response.data) {
                 return { data: response }
             }
-            
-            // Trường hợp 2: Backend trả về trực tiếp data object (có qrCodeUrl, payUrl, etc.)
-            if (response && (response.qrCodeUrl || response.qr_code_url || response.payUrl || response.pay_url)) {
-                return { data: { success: true, data: response } }
-            }
-            
-            // Trường hợp 3: Response không có format mong đợi, trả về như cũ
-            return { data: { success: true, data: response } }
+     
         } catch (error) {
             console.error("Create MoMo payment error:", error)
             throw error
         }
     }
+
+    // Tạo payment request VNPay
+    // const createVNPayPaymentStore = async (paymentData) => {
+    //     try {
+    //         const { orderId, amount, orderInfo, purpose } = paymentData
+            
+    //         // Validate dữ liệu trước khi gửi
+    //         if (!orderId || orderId <= 0) {
+    //             throw new Error('OrderId không hợp lệ')
+    //         }
+    //         if (!amount || amount <= 0) {
+    //             throw new Error('Amount không hợp lệ')
+    //         }
+    //         if (amount < 1000) {
+    //             console.warn('⚠️ Amount nhỏ hơn 1000 VND, VNPay có thể từ chối')
+    //         }
+            
+    //         console.log('🔍 VNPay Payment Store - Input data:', {
+    //             orderId,
+    //             amount,
+    //             amountType: typeof amount,
+    //             orderInfo,
+    //             purpose,
+    //             isValidOrderId: !!(orderId && orderId > 0),
+    //             isValidAmount: !!(amount && amount > 0)
+    //         })
+            
+    //         const response = await createVNPayPayment(orderId, amount, orderInfo, purpose)
+            
+    //         console.log('🔍 VNPay Payment Store - Raw response:', response)
+    //         console.log('🔍 VNPay Payment Store - Response type:', typeof response)
+    //         console.log('🔍 VNPay Payment Store - Response keys:', response ? Object.keys(response) : 'null')
+            
+    //         // Response từ apiClient đã được unwrap bởi interceptor
+    //         // apiClient.interceptors.response.use((response) => response.data)
+    //         // Vậy response ở đây chính là response.data từ axios
+            
+    //         // Theo tài liệu: Backend trả về { success: true, data: { payUrl: "..." } }
+    //         // Response từ apiClient đã được unwrap, nên response = response.data từ axios
+            
+    //         // Trường hợp 1: Backend trả về { success: true, data: { payUrl: "..." } }
+    //         if (response && response.success && response.data) {
+    //             console.log('✅ VNPay Payment Store - Response format 1 (success + data)')
+    //             console.log('✅ VNPay Payment Store - Data keys:', Object.keys(response.data))
+    //             // Kiểm tra xem có payUrl trong data không
+    //             if (response.data.payUrl || response.data.paymentUrl) {
+    //                 console.log('✅ VNPay Payment Store - Found payUrl in response.data')
+    //             }
+    //             return { data: response }
+    //         }
+            
+    //         // Trường hợp 2: Backend trả về trực tiếp data object với payUrl (theo tài liệu)
+    //         // Ưu tiên payUrl trước paymentUrl (theo tài liệu VNPay dùng payUrl)
+    //         if (response && (response.payUrl || response.pay_url || response.paymentUrl || response.payment_url)) {
+    //             console.log('✅ VNPay Payment Store - Response format 2 (direct data object)')
+    //             console.log('✅ VNPay Payment Store - Found URL field:', 
+    //                 response.payUrl ? 'payUrl' : 
+    //                 response.pay_url ? 'pay_url' : 
+    //                 response.paymentUrl ? 'paymentUrl' : 'payment_url')
+    //             return { data: { success: true, data: response } }
+    //         }
+            
+    //         // Trường hợp 3: Response không có format mong đợi, trả về như cũ
+    //         console.warn('⚠️ VNPay Payment Store - Response format không xác định, trả về như cũ')
+    //         console.warn('⚠️ Full response:', JSON.stringify(response, null, 2))
+    //         return { data: { success: true, data: response } }
+    //     } catch (error) {
+    //         console.error("❌ Create VNPay payment error:", error)
+    //         console.error("❌ Error details:", {
+    //             message: error.message,
+    //             response: error.response?.data,
+    //             status: error.response?.status,
+    //             statusText: error.response?.statusText,
+    //             config: error.config
+    //         })
+    //         throw error
+    //     }
+    // }
 
     // Tạo payment record sau khi tạo đơn hàng (chỉ tạo nếu chưa tồn tại)
     const createPaymentStore = async (orderId, paymentData) => {
@@ -112,7 +178,7 @@ export const usePaymentStore = defineStore("payment", () => {
                 }
             } catch (getError) {
                 // Payment chưa tồn tại, tạo mới
-                console.log('Payment does not exist, creating new payment')
+                console.log('Payment does not exist, creating new payment', getError.message)
             }
 
             // Tạo payment mới
@@ -196,6 +262,7 @@ export const usePaymentStore = defineStore("payment", () => {
         payments,
         currentPayment,
         createMoMoPaymentStore,
+        // createVNPayPaymentStore,
         createPaymentStore,
         createOrUpdatePaymentStore,
         getPaymentByOrderIdStore,

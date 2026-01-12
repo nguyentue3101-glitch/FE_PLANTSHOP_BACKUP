@@ -48,23 +48,23 @@ const password = ref("")
 const isSendingOtp = ref(false)
 
 // Validate email
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
+// const validateEmail = (email) => {
+//   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+//   return emailRegex.test(email)
+// }
 
 
 // Gửi OTP
 const handleSendOtp = async () => {
-  if (!email.value) {
-    emit('error', 'Vui lòng nhập email')
-    return false
-  }
+  // if (!email.value) {
+  //   emit('error', 'Vui lòng nhập email')
+  //   return false
+  // }
 
-  if (!validateEmail(email.value)) {
-    emit('error', 'Email không hợp lệ')
-    return false
-  }
+  // if (!validateEmail(email.value)) {
+  //   emit('error', 'Email không hợp lệ')
+  //   return false
+  // }
 
   isSendingOtp.value = true
 
@@ -95,26 +95,26 @@ const handleSendOtp = async () => {
 
 // Submit form - Chỉ gửi OTP và redirect
 const handleSubmit = async () => {
-  // Validate form trước khi gửi OTP
-  if (!username.value) {
-    emit('error', 'Vui lòng nhập username')
-    return
-  }
+  // // Validate form trước khi gửi OTP
+  // if (!username.value) {
+  //   emit('error', 'Vui lòng nhập username')
+  //   return
+  // }
 
-  if (!email.value) {
-    emit('error', 'Vui lòng nhập email')
-    return
-  }
+  // if (!email.value) {
+  //   emit('error', 'Vui lòng nhập email')
+  //   return
+  // }
 
-  if (!validateEmail(email.value)) {
-    emit('error', 'Email không hợp lệ')
-    return
-  }
+  // if (!validateEmail(email.value)) {
+  //   emit('error', 'Email không hợp lệ')
+  //   return
+  // }
 
-  if (!password.value) {
-    emit('error', 'Vui lòng nhập mật khẩu')
-    return
-  }
+  // if (!password.value) {
+  //   emit('error', 'Vui lòng nhập mật khẩu')
+  //   return
+  // }
 
   // Gửi OTP và redirect đến trang nhập OTP
   await handleSendOtp()

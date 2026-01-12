@@ -36,7 +36,7 @@
         </div>
         <div v-if="viewType === 'month'" class="flex items-center gap-2">
           <label for="monthPicker" class="text-sm font-medium text-gray-700">Chọn tháng:</label>
-          <input id="monthPicker" type="month" v-model="selectedMonthYear" @change="onMonthYearChange"
+          <input id="monthPicker" type="month" v-model="selectedMonthYear" @change="loadStatistics"
             class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <div v-else class="flex items-center gap-2">
@@ -47,7 +47,7 @@
             placeholder="Năm" />
         </div>
         <button @click="loadStatistics"
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          class="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
           Tải Lại
         </button>
       </div>
@@ -151,7 +151,7 @@
               {{ viewType === 'year' ? 'Sơ Đồ Doanh Thu Theo Năm' :
                 `Sơ Đồ Doanh Thu Theo Tháng (${selectedMonth}/${selectedYear})` }}
             </h3>
-            <div class="h-[500px] w-[1100px]">
+            <div class="h-[500px] w-[1000px]">
               <Bar v-if="barData" :data="barData" :options="barOptions" />
             </div>
           </div>
@@ -190,47 +190,6 @@ import {
 import { Bar } from "vue-chartjs"
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement)
 
-// Custom plugin để hiển thị phần trăm trong biểu đồ tròn (chỉ cho Pie chart)
-const percentagePlugin = {
-  id: 'percentagePlugin',
-  afterDatasetsDraw(chart) {
-    // Chỉ áp dụng cho Pie chart, không áp dụng cho Bar chart
-    if (chart.config.type !== 'pie') return
-
-    const ctx = chart.ctx
-    const data = chart.data.datasets[0].data
-    const total = data.reduce((sum, val) => sum + val, 0)
-
-    if (total === 0) return
-
-    chart.data.datasets.forEach((dataset, datasetIndex) => {
-      const meta = chart.getDatasetMeta(datasetIndex)
-
-      meta.data.forEach((element, index) => {
-        const value = data[index]
-        if (value <= 0) return
-
-        const percentage = ((value / total) * 100).toFixed(1)
-
-        // Tính toán vị trí trung tâm của slice
-        const { x, y } = element.tooltipPosition()
-
-        ctx.save()
-        // Vẽ text với shadow để dễ đọc hơn
-        ctx.shadowColor = 'rgba(255, 255, 255, 0.8)'
-        ctx.shadowBlur = 4
-        ctx.shadowOffsetX = 1
-        ctx.shadowOffsetY = 1
-        ctx.font = 'bold 16px Arial'
-        ctx.fillStyle = '#333'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(`${percentage}%`, x, y)
-        ctx.restore()
-      })
-    })
-  }
-}
 
 // Plugin để hiển thị doanh thu trên đầu mỗi cột trong bar chart
 const barRevenuePlugin = {
@@ -271,11 +230,11 @@ const barRevenuePlugin = {
 }
 
 // Đăng ký plugins
-ChartJS.register(percentagePlugin, barRevenuePlugin)
+ChartJS.register(barRevenuePlugin)
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
 import { getStatisticsByDate, getStatisticsByMonth, getStatisticsByYear } from '@/api/statistics/get'
 import { getAllUser } from '@/api/user/get'
-import { getAllProducts } from '@/api/products/get'
+// import { getAllProducts } from '@/api/products/get'
 import { useStatisticsStore } from '@/stores/statistics'
 import { Users, Package, DollarSign, ShoppingCart } from "lucide-vue-next"
 
@@ -284,37 +243,19 @@ const statisticsStore = useStatisticsStore()
 const { totalProductsSoldByMonth, totalProductsSoldByYear } = storeToRefs(statisticsStore)
 
 // Filter state
-const viewType = ref('month') // 'day', 'month' or 'year'
+const viewType = ref('month') 
 const selectedYear = ref(new Date().getFullYear())
-const selectedMonth = ref(new Date().getMonth() + 1)
-// const selectedDay = ref(new Date().getDate())
+const selectedMonth = ref(new Date().getMonth() + 1) //vì JS trả về tháng từ 0-11
 
-// Computed property for date picker (format: YYYY-MM-DD)
-// const selectedDate = computed({
-//   get() {
-//     const year = selectedYear.value
-//     const month = String(selectedMonth.value).padStart(2, '0')
-//     const day = String(selectedDay.value).padStart(2, '0')
-//     return `${year}-${month}-${day}`
-//   },
-//   set(value) {
-//     if (value) {
-//       const [year, month, day] = value.split('-')
-//       selectedYear.value = parseInt(year)
-//       selectedMonth.value = parseInt(month)
-//       selectedDay.value = parseInt(day)
-//     }
-//   }
-// })
 
-// Computed property for month-year picker (format: YYYY-MM)
+// format trung gian cho month-year input
 const selectedMonthYear = computed({
   get() {
     const year = selectedYear.value
     const month = String(selectedMonth.value).padStart(2, '0')
     return `${year}-${month}`
   },
-  set(value) {
+  set(value) { //chạy khi người dùng thay đổi giá trị input
     if (value) {
       const [year, month] = value.split('-')
       selectedYear.value = parseInt(year)
@@ -323,48 +264,27 @@ const selectedMonthYear = computed({
   }
 })
 
-// Handle month-year picker change
-const onMonthYearChange = () => {
-  loadStatistics()
-}
 
-// Handle date picker change
-// const onDateChange = () => {
-//   loadStatistics()
-// }
 
-// // Format date for display
-// const formatDate = (dateString) => {
-//   if (!dateString) return ''
-//   const date = new Date(dateString)
-//   const day = String(date.getDate()).padStart(2, '0')
-//   const month = String(date.getMonth() + 1).padStart(2, '0')
-//   const year = date.getFullYear()
-//   return `${day}/${month}/${year}`
-// }
+
 
 // Statistics data
 const statistics = ref(null)
 
 // Total counts
 const totalUsers = ref(0)
-const totalProducts = ref(0)
+// const totalProducts = ref(0)
 
 // Computed property để lấy tổng số lượng sản phẩm đã bán từ store
 const totalProductsSold = computed(() => {
   const value = viewType.value === 'month'
     ? totalProductsSoldByMonth.value
     : totalProductsSoldByYear.value
-  console.log('📊 totalProductsSold computed:', {
-    viewType: viewType.value,
-    value: value,
-    byMonth: totalProductsSoldByMonth.value,
-    byYear: totalProductsSoldByYear.value
-  })
+ 
   return value || 0
 })
 
-// Available years (current year and 2 years before)
+// lấy 2 năm trước, năm hiện tại và năm sau
 const availableYears = computed(() => {
   const currentYear = new Date().getFullYear()
   return [currentYear - 2, currentYear - 1, currentYear, currentYear + 1]
@@ -383,38 +303,7 @@ const formatCurrency = (amount) => {
   }).format(amount)
 }
 
-// Generate colors for pie chart
-// const generateColors = (count) => {
-//   const colors = [
-//     "rgba(255, 99, 132, 0.6)",
-//     "rgba(54, 162, 235, 0.6)",
-//     "rgba(255, 205, 86, 0.6)",
-//     "rgba(75, 192, 192, 0.6)",
-//     "rgba(153, 102, 255, 0.6)",
-//     "rgba(255, 159, 64, 0.6)",
-//     "rgba(199, 199, 199, 0.6)",
-//     "rgba(83, 102, 255, 0.6)",
-//     "rgba(255, 99, 255, 0.6)",
-//     "rgba(99, 255, 132, 0.6)",
-//   ]
-//   const borderColors = [
-//     "rgba(255, 99, 132, 1)",
-//     "rgba(54, 162, 235, 1)",
-//     "rgba(255, 205, 86, 1)",
-//     "rgba(75, 192, 192, 1)",
-//     "rgba(153, 102, 255, 1)",
-//     "rgba(255, 159, 64, 1)",
-//     "rgba(199, 199, 199, 1)",
-//     "rgba(83, 102, 255, 1)",
-//     "rgba(255, 99, 255, 1)",
-//     "rgba(99, 255, 132, 1)",
-//   ]
 
-//   return {
-//     background: colors.slice(0, count),
-//     border: borderColors.slice(0, count)
-//   }
-// }
 
 // Handle view type change
 const onViewTypeChange = () => {
@@ -424,7 +313,7 @@ const onViewTypeChange = () => {
   loadStatistics()
 }
 
-// Load daily data for bar chart when viewing by month
+// lấy doanh thu từng ngày trong tháng
 const dailyRevenueData = ref([])
 const loadDailyDataForMonth = async () => {
   dailyRevenueData.value = []
@@ -454,39 +343,34 @@ const loadDailyDataForMonth = async () => {
   }
 
   const results = await Promise.all(promises)
-  dailyRevenueData.value = results.sort((a, b) => a.day - b.day)
+  dailyRevenueData.value = results.sort((a, b) => a.day - b.day) //sắp theo ngày tăng dần
 }
 
 // Load statistics data
 const loadStatistics = async () => {
   await executeAsync(async () => {
     if (viewType.value === 'month') {
-      // Load statistics by month
+      // lấy doanh thu theo tháng
       const statsResponse = await getStatisticsByMonth(selectedYear.value, selectedMonth.value)
       if (statsResponse.data?.success && statsResponse.data?.data) {
         statistics.value = statsResponse.data.data
       }
-
-      // Load total products sold by month
-      console.log('🔄 Loading total products sold by month:', selectedYear.value, selectedMonth.value)
+      // lấy tổng sản phẩm bán được theo tháng
       await statisticsStore.getTotalProductsSoldByMonthStore(selectedYear.value, selectedMonth.value)
-      console.log('✅ After load, store value:', statisticsStore.totalProductsSoldByMonth)
 
-      // Load daily data for bar chart (hiển thị theo ngày trong tháng)
+      // lấy doanh thu từng ngày trong tháng
       await loadDailyDataForMonth()
     } else {
-      // Load statistics by year
+      // lấy doanh thu theo năm
       const statsResponse = await getStatisticsByYear(selectedYear.value)
       if (statsResponse.data?.success && statsResponse.data?.data) {
         statistics.value = statsResponse.data.data
       }
 
-      // Load total products sold by year
-      console.log('🔄 Loading total products sold by year:', selectedYear.value)
+      //  lấy tổng sản phẩm bán được theo năm
       await statisticsStore.getTotalProductsSoldByYearStore(selectedYear.value)
-      console.log('✅ After load, store value:', statisticsStore.totalProductsSoldByYear)
 
-      // Load monthly data for bar chart
+      // lấy doanh thu từng ngày trong năm
       await loadMonthlyDataForYear()
     }
   }, {
@@ -494,7 +378,7 @@ const loadStatistics = async () => {
   })
 }
 
-// Load monthly data for bar chart when viewing by year
+// lấy doanh thu từng tháng trong năm
 const monthlyRevenueData = ref([])
 const loadMonthlyDataForYear = async () => {
   monthlyRevenueData.value = []
@@ -521,14 +405,16 @@ const loadMonthlyDataForYear = async () => {
   monthlyRevenueData.value = results.sort((a, b) => a.month - b.month)
 }
 
-// Bar chart data - Doanh thu
+// khoi tạo dữ liệu cho biểu đồ cột và tự động tính toán khi dữ liệu thay đổi
 const barData = computed(() => {
   const labels = []
   const revenueData = []
 
   if (viewType.value === 'month') {
     // Hiển thị doanh thu theo tất cả các ngày trong tháng
-    const daysInMonth = new Date(selectedYear.value, selectedMonth.value, 0).getDate()
+    //0 => lấy ngày cuối cùng của tháng trước đó
+    //.getDate() => lấy ngày trong tháng
+    const daysInMonth = new Date(selectedYear.value, selectedMonth.value, 0).getDate() 
 
     if (dailyRevenueData.value.length > 0) {
       // Tạo map để dễ tìm kiếm
@@ -566,12 +452,12 @@ const barData = computed(() => {
   }
 
   return {
-    labels,
-    datasets: [
+    labels, //trục x
+    datasets: [ 
       {
         type: 'bar',
         label: "Doanh Thu (VNĐ)",
-        data: revenueData,
+        data: revenueData, //trục y
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -581,107 +467,39 @@ const barData = computed(() => {
   }
 })
 
-// Pie chart data - Top products
-// const pieData = computed(() => {
-//   if (!topProducts.value || topProducts.value.length === 0) {
-//     return {
-//       labels: ["Chưa có dữ liệu"],
-//       datasets: [
-//         {
-//           data: [1],
-//           backgroundColor: ["rgba(199, 199, 199, 0.6)"],
-//           borderColor: ["rgba(199, 199, 199, 1)"],
-//           borderWidth: 1,
-//         },
-//       ],
-//     }
-//   }
 
-//   // Debug: log dữ liệu để kiểm tra
-//   console.log('Top Products Data:', topProducts.value)
-//   const labels = topProducts.value.map(product => {
-//     // Từ console log, field đúng là productName
-//     return product.productName || 'Sản phẩm không tên'
-//   })
-
-//   const data = topProducts.value.map(product => {
-//     // Thử nhiều field name có thể có (theo thứ tự ưu tiên)
-//     // Từ console log, field đúng là totalQuantitySold
-//     const quantity = product.totalQuantitySold
-
-//       || 0
-//     // Đảm bảo là số
-//     const numValue = Number(quantity) || 0
-//     return numValue
-//   })
-
-//   // Kiểm tra nếu tất cả giá trị đều là 0
-//   const totalQuantity = data.reduce((sum, val) => sum + val, 0)
-//   if (totalQuantity === 0) {
-//     console.warn('Tất cả giá trị quantity đều là 0, hiển thị biểu đồ với giá trị mặc định')
-//     // Nếu tất cả giá trị đều là 0, hiển thị một slice duy nhất
-//     return {
-//       labels: ["Chưa có dữ liệu bán hàng"],
-//       datasets: [
-//         {
-//           data: [1],
-//           backgroundColor: ["rgba(199, 199, 199, 0.6)"],
-//           borderColor: ["rgba(199, 199, 199, 1)"],
-//           borderWidth: 1,
-//         },
-//       ],
-//     }
-//   }
-
-//   const colors = generateColors(topProducts.value.length)
-
-//   const chartData = {
-//     labels,
-//     datasets: [
-//       {
-//         data,
-//         backgroundColor: colors.background,
-//         borderColor: colors.border,
-//         borderWidth: 1,
-//       },
-//     ],
-//   }
-
-//   console.log('Pie Chart Data:', chartData)
-//   return chartData
-// })
 
 const barOptions = computed(() => ({
-  responsive: true,
-  maintainAspectRatio: false,
+  responsive: true, // Tự động điều chỉnh kích thước để phù hợp với container
+  maintainAspectRatio: false, // Cho phép thay đổi tỉ lệ khung hình
   plugins: {
-    legend: {
+    legend: { //chú thích
       position: "top",
     },
-    title: {
-      display: false,
-    },
-    tooltip: {
+    title: { 
+      display: false, 
+    }, 
+    tooltip: { // hiển thị thông tin khi hover
       callbacks: {
         label: function (context) {
-          return `Doanh Thu: ${formatCurrency(context.parsed.y)}`
+          return `Doanh Thu: ${formatCurrency(context.parsed.y)}` // Hiển thị doanh thu dưới dạng tiền tệ
         }
       }
     }
   },
   scales: {
     y: {
-      type: 'linear',
-      position: 'left',
-      beginAtZero: true,
-      ticks: {
+      type: 'linear', // trục y dạng tuyến tính
+      position: 'left',// vị trí bên trái
+      beginAtZero: true,// bắt đầu từ 0
+      ticks: { // định dạng trục y
         callback: function (value) {
           return formatCurrency(value)
         }
       },
       title: {
         display: true,
-        text: 'Doanh Thu (VNĐ)'
+        text: 'Doanh Thu Theo Mốc (VNĐ)'
       }
     },
     x: {
@@ -696,38 +514,19 @@ const barOptions = computed(() => ({
   }
 }))
 
-// const pieOptions = {
-//   responsive: true,
-//   maintainAspectRatio: false,
-//   plugins: {
-//     legend: {
-//       position: "bottom",
-//     },
-//     tooltip: {
-//       callbacks: {
-//         label: function (context) {
-//           const label = context.label || ''
-//           const value = context.parsed || 0
-//           const total = context.dataset.data.reduce((sum, val) => sum + val, 0)
-//           const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0
-//           return `${label}: ${formatNumber(value)} sản phẩm (${percentage}%)`
-//         }
-//       }
-//     }
-//   },
-// }
+
 
 // Load total users
 const loadTotalUsers = async () => {
   try {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
+    const token = localStorage.getItem('accessToken') 
     if (!token) {
       totalUsers.value = 0
       return
     }
 
     const response = await getAllUser(token)
-    if (response.data?.success && Array.isArray(response.data.data)) {
+    if (response.data?.success) {
       totalUsers.value = response.data.data.length
     } else {
       totalUsers.value = 0
@@ -739,25 +538,25 @@ const loadTotalUsers = async () => {
 }
 
 // Load total products
-const loadTotalProducts = async () => {
-  try {
-    const response = await getAllProducts()
-    if (response.data?.success && Array.isArray(response.data.data)) {
-      totalProducts.value = response.data.data.length
-    } else {
-      totalProducts.value = 0
-    }
-  } catch (error) {
-    console.error('Error loading total products:', error)
-    totalProducts.value = 0
-  }
-}
+// const loadTotalProducts = async () => {
+//   try {
+//     const response = await getAllProducts()
+//     if (response.data?.success ) {
+//       totalProducts.value = response.data.data.length
+//     } else {
+//       totalProducts.value = 0
+//     }
+//   } catch (error) {
+//     console.error('Error loading total products:', error)
+//     totalProducts.value = 0
+//   }
+// }
 
 // Load all initial data
 const loadInitialData = async () => {
   await Promise.all([
     loadTotalUsers(),
-    loadTotalProducts(),
+    // loadTotalProducts(),
     loadStatistics()
   ])
 }

@@ -258,27 +258,33 @@ const initializeFormData = () => {
         if (field.type === 'address') {
             // Khởi tạo addressFieldData
             addressFieldData[field.key] = {
-                address: props.initialData?.[field.key] || '',
-                district_id: props.initialData?.[`${field.key}_district_id`] || props.initialData?.district_id || null,
-                city_id: props.initialData?.[`${field.key}_city_id`] || props.initialData?.city_id || null
+                address: props.initialData?.[field.key] 
             }
-            data[field.key] = props.initialData?.[field.key] || ''
-            data[`${field.key}_district_id`] = props.initialData?.[`${field.key}_district_id`] || props.initialData?.district_id || null
-            data[`${field.key}_city_id`] = props.initialData?.[`${field.key}_city_id`] || props.initialData?.city_id || null
+            data[field.key] = props.initialData?.[field.key] 
         }
         // Nếu có initialData (update mode), sử dụng giá trị từ đó
-        else if (props.initialData && props.initialData[field.key] !== undefined) {
+        else if (props.initialData && props.initialData[field.key] !== undefined) 
+        {
             data[field.key] = props.initialData[field.key]
-        } else if (field.type === 'number') {
+        } 
+        else if (field.type === 'number') 
+        {
             data[field.key] = field.defaultValue !== undefined ? field.defaultValue : 0
-        } else if (field.type === 'file') {
-            // Không set giá trị cho file input
-        } else if ((field.type === 'image' || field.type === 'file') && props.initialData && props.initialData[field.key]) {
+        } 
+        // else if (field.type === 'file') 
+        // {
+        //     data[field.key] = field.defaultValue !== undefined ? field.defaultValue : null
+        // } 
+        else if ((field.type === 'image' || field.type === 'file') && props.initialData && props.initialData[field.key]) 
+        {
             // Nếu là image/file field và có initialData, set imagePreview
             imagePreview.value = props.initialData[field.key]
-        } else if (field.type === 'email' || field.type === 'password' || field.type === 'text') {
+        } 
+        else if (field.type === 'email' || field.type === 'password' || field.type === 'text') 
+        {
             data[field.key] = field.defaultValue !== undefined ? field.defaultValue : ''
-        } else {
+        } 
+        else {
             data[field.key] = field.defaultValue !== undefined ? field.defaultValue : ''
         }
     })
@@ -302,7 +308,7 @@ const handleFileLabelClick = () => {
 
 
 const handleFileChange = (event) => {
-    const file = event.target.files[0]
+    const file = event.target.files[0] // Lấy file được chọn
     if (file) {
         // chỉ up hình
         const accept = props.fields.find(f => f.type === 'file')?.accept
@@ -421,17 +427,12 @@ const handleSubmit = () => {
         submitData.imageFile = selectedFile.value
     }
 
-    // Xử lý address fields: gộp lại thành address, district_id, city_id
+    // Xử lý address fields
     props.fields.forEach(field => {
         if (field.type === 'address') {
             const addressData = addressFieldData[field.key]
             if (addressData) {
-                submitData[field.key] = addressData.address || ''
-                submitData['district_id'] = addressData.district_id || null
-                submitData['city_id'] = addressData.city_id || null
-                // Xóa các field phụ
-                delete submitData[`${field.key}_district_id`]
-                delete submitData[`${field.key}_city_id`]
+                submitData[field.key] = addressData.address 
             }
         }
     })

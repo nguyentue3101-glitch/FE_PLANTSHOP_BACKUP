@@ -99,8 +99,11 @@ axios.interceptors.response.use(
           try {
             const { useAuthStore } = await import('./stores/auth')
             const authStore = useAuthStore()
-            authStore.accessToken = newAccessToken
-            authStore.refreshToken = newRefreshToken
+            // Cập nhật token trong store (ref cần dùng .value)
+            authStore.accessToken.value = newAccessToken
+            authStore.refreshToken.value = newRefreshToken
+            // Cập nhật localStorage (đã được cập nhật ở trên, nhưng đảm bảo đồng bộ)
+            authStore.saveTokens(newAccessToken, newRefreshToken)
             
             // Reload user info sau khi refresh token thành công
             try {

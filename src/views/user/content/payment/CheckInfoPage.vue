@@ -11,10 +11,10 @@
                     <!-- Username -->
                     <div>
                         <label for="username" class="block text-gray-700 font-semibold mb-2">
-                            Tên người dùng <span class="text-red-500">*</span>
+                            Tên người nhận <span class="text-red-500">*</span>
                         </label>
                         <input v-model="formData.username" type="text" id="username" required
-                            placeholder="Nhập tên người dùng"
+                            placeholder="Nhập tên người nhận"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
                     </div>
 
@@ -29,9 +29,9 @@
                     </div>
 
                     <!-- Address -->
-                    <AddressSelector v-model="addressData" mode="shipping" :required="true" :show-shipping-notice="true"
+                    <AddressSelector v-model="addressData" :mode="'shipping'" :required="true"
                         focus-ring-class="focus:ring-green-500" address-placeholder="Ví dụ: 123 Đường ABC, Phường XYZ"
-                        @change="handleAddressChange" />
+                         />
 
                     <!-- Note -->
                     <div>
@@ -71,7 +71,7 @@ import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUserStore } from '@/stores/user'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
-import { useProvinces } from '@/composables/useProvinces'
+// import { useProvinces } from '@/composables/useProvinces'
 import ConfirmLeaveModal from '@/components/common/ConfirmLeaveModal.vue'
 import AddressSelector from '@/components/common/AddressSelector.vue'
 
@@ -82,12 +82,11 @@ const userStore = useUserStore()
 const { isLoading, errorMessage, executeAsync } = useAsyncOperation()
 
 // Sử dụng composable để load dữ liệu tỉnh thành
-const { loadProvinces, isLoading: isLoadingProvinces } = useProvinces()
+// const { loadProvinces, isLoading: isLoadingProvinces } = useProvinces()
 
 const formData = ref({
     username: '',
     phone_number: '',
-    address: '',
     note: ''
 })
 
@@ -96,22 +95,18 @@ const addressData = ref({
     fullAddress: '',
     address: '',
     district_id: null,
-    city_id: null,
-    district_name: null
+    city_id: null
 })
 
 const showConfirmModal = ref(false)
 const pendingNavigation = ref(null)
 
-// Chặn navigation về trang home khi đang ở trang checkout
+// Chặn navigation về các trang khi đang ở trang CheckInfoPage
 onBeforeRouteLeave((to, from, next) => {
-    // Cho phép điều hướng đến các trang khác, nhưng chặn về home
-    if (to.path === '/home' || to.name === 'home') {
+    if (to.name === 'home' || to.name === 'product' || to.name === 'contact' || to.name === 'userinfo' || to.name === 'cart') {
         pendingNavigation.value = { to, next }
         showConfirmModal.value = true
-        // Không gọi next() để chặn navigation
     } else {
-        // Cho phép điều hướng đến các trang khác (cart, review-order, etc.)
         next()
     }
 })
@@ -135,18 +130,14 @@ const handleCancelLeave = () => {
 
 
 onMounted(async () => {
-    // Xóa flag order_completed để tránh redirect về home khi đang ở trang checkout
-    // (flag này có thể còn sót từ lần thanh toán trước)
+    //kiểm tra flag
+    console.log('completed_order_id:', sessionStorage.getItem('completed_order_id'))
+    console.log('order_completed:', sessionStorage.getItem('order_completed'))
     sessionStorage.removeItem('order_completed')
-    // KHÔNG xóa completed_order_id vì có thể cần dùng để cập nhật shipping info
-
-    // Load dữ liệu tỉnh thành từ API trước để đảm bảo sẵn sàng khi AddressSelector render
-    try {
-        await loadProvinces()
-        console.log('✅ CheckInfoPage - Loaded provinces from API')
-    } catch (error) {
-        console.error('❌ CheckInfoPage - Failed to load provinces from API:', error)
-    }
+    sessionStorage.removeItem('completed_order_id')
+    console.log('completed_order_id:', sessionStorage.getItem('completed_order_id'))
+    console.log('order_completed:', sessionStorage.getItem('order_completed'))
+   
 
     try {
         const token = authStore.accessToken
@@ -156,17 +147,7 @@ onMounted(async () => {
                 formData.value = {
                     username: userStore.userInfo.username || '',
                     phone_number: userStore.userInfo.phone_number || '',
-                    address: userStore.userInfo.address || ''
-                }
-
-                // Khởi tạo addressData từ userInfo nếu có
-                // Lưu ý: Địa chỉ chi tiết (address) không lấy từ userInfo, để người dùng nhập mới
-                addressData.value = {
-                    fullAddress: '',
-                    address: '',
-                    district_id: userStore.userInfo.district_id || null,
-                    city_id: userStore.userInfo.city_id || null,
-                    district_name: null
+                    // address: userStore.userInfo.address || ''
                 }
             }
         }
@@ -175,10 +156,6 @@ onMounted(async () => {
     }
 })
 
-// Xử lý khi địa chỉ thay đổi
-const handleAddressChange = (newAddressData) => {
-    addressData.value = { ...newAddressData }
-}
 
 const handleSubmit = async () => {
     // Validate required fields
@@ -202,6 +179,7 @@ const handleSubmit = async () => {
     // Validate địa chỉ chi tiết - bắt buộc phải nhập
     if (!addressData.value.address || !addressData.value.address.trim()) {
         errorMessage.value = 'Vui lòng nhập địa chỉ chi tiết!'
+
         return
     }
 
@@ -227,31 +205,30 @@ const handleSubmit = async () => {
             sessionStorage.setItem('shipping_city_id', addressData.value.city_id)
         }
 
-        console.log('✅ CheckInfoPage - Shipping info saved to sessionStorage:', shippingInfo)
+        console.log(' kiểm tra lưu thông tin giao hàng trong sessionStorage:', shippingInfo)
 
         // Xóa flag review_page_left để đảm bảo có thể vào trang ReviewOrderPage
-        // (flag này được set khi rời khỏi ReviewOrderPage, nhưng khi navigate từ CheckoutPage thì cần xóa)
         sessionStorage.removeItem('review_page_left')
 
         // Navigate to review order page with shipping info
         router.push({
             name: 'payment',
             query: {
-                ...route.query, // Preserve selectedItems from cart page
-                shippingInfo: JSON.stringify({
-                    ...formData.value,
+                ...route.query, // sao chép các query params hiện tại
+                shippingInfo: JSON.stringify({ //chuyển thông tin giao hàng dưới dạng chuỗi
+                    ...formData.value, 
                     address: addressData.value.fullAddress,
                     city_id: addressData.value.city_id || null
                 }),
-                fromCheckout: 'true' // Đánh dấu là điều hướng từ checkout
+                fromCheckout: 'true' // Đánh dấu là điều hướng từ trang checkInfoPage
             }
         })
     }, {
         defaultErrorMessage: 'Có lỗi xảy ra. Vui lòng thử lại!',
-        onError: (error) => {
-            // Nếu lỗi là do cập nhật user info hoặc shipping info, vẫn cho phép tiếp tục
-            console.error('Error in handleSubmit:', error)
-        }
+        // onError: (error) => {
+        //     // Nếu lỗi là do cập nhật user info hoặc shipping info, vẫn cho phép tiếp tục
+        //     console.error('Error in handleSubmit:', error)
+        // }
     })
 }
 

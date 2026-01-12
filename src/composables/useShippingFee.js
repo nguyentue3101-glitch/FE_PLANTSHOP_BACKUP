@@ -4,61 +4,52 @@
 export function useShippingFee() {
   const HCM_PROVINCE_CODE = 79
 
-  /**
-   * Kiểm tra xem có phải thành phố Hồ Chí Minh không (dựa vào cityId)
-   * @param {number|null} cityId - Mã thành phố
-   * @returns {boolean}
-   */
+
   const isHoChiMinhCity = (cityId) => {
     if (!cityId) return false
     return parseInt(cityId) === HCM_PROVINCE_CODE
   }
 
-  /**
-   * Tính phí ship theo thành phố
-   * - Thành phố Hồ Chí Minh (cityId = 79): 70,000 VNĐ
-   * - Tất cả các tỉnh thành khác: 100,000 VNĐ
-   * 
-   * @param {Object} options - Các tùy chọn
-   * @param {number|null} options.cityId - Mã thành phố
-   * @returns {number} Phí ship (VNĐ)
-   */
-  const calculateShippingFeeByCity = ({ cityId = null } = {}) => {
-    // Lấy city_id từ sessionStorage nếu không có trong options
+
+  const calculateShippingFeeByCity = ({ cityId = null, orderId = null } = {}) => {
+    // Lấy city_id từ tham số truyền vào
     let finalCityId = cityId
-    if (!finalCityId) {
-      const shippingCityId = sessionStorage.getItem('shipping_city_id')
-      if (shippingCityId) {
-        finalCityId = parseInt(shippingCityId)
-      }
-    }
+    console.log('calculateShippingFeeByCity - cityId truyền vào:', cityId, 'orderId:', orderId)
 
     // Tính phí ship dựa vào city_id
-    if (isHoChiMinhCity(finalCityId)) {
-      return 70000 // Hồ Chí Minh
-    } else {
-      return 100000 // Tất cả các tỉnh thành khác
+    return isHoChiMinhCity(finalCityId) ? 70000 : 100000
+  }
+  
+  // Hàm helper để lưu city_id vào localStorage khi tạo order
+  const saveOrderCityId = (orderId, cityId) => {
+    if (orderId && cityId) {
+      localStorage.setItem(`order_${orderId}_city_id`, cityId.toString())
     }
   }
 
-  /**
-   * Tính phí ship từ order object (tính theo cityId từ order hoặc sessionStorage)
-   * @param {Object} order - Order object
-   * @param {Array} orderDetails - Danh sách order details (không sử dụng, chỉ để tương thích)
-   * @returns {number} Phí ship (VNĐ)
-   */
-  const getShippingFeeFromOrder = (order, orderDetails = null) => {
+ 
+  const getShippingFeeFromOrder = (order = null) => {
     // Lấy cityId từ order object nếu có
-    const cityId = order?.city_id || null
+    let cityId = order?.city_id || null
     
-    // Tính phí ship dựa vào cityId
-    return calculateShippingFeeByCity({ cityId })
+    // Nếu không có city_id trong order, thử lấy từ localStorage (lưu khi tạo order)
+    if (!cityId && order?.order_id) {
+      const localStorageKey = `order_${order.order_id}_city_id`
+      const storedCityId = localStorage.getItem(localStorageKey)
+      if (storedCityId) {
+        cityId = parseInt(storedCityId)
+      }
+    }
+    
+    // Tính phí ship dựa vào cityId và orderId (để calculateShippingFeeByCity có thể đọc lại từ localStorage nếu cần)
+    return calculateShippingFeeByCity({ cityId, orderId: order?.order_id || null })
   }
 
   return {
     isHoChiMinhCity,
     calculateShippingFeeByCity,
-    getShippingFeeFromOrder
+    getShippingFeeFromOrder,
+    saveOrderCityId
   }
 }
 

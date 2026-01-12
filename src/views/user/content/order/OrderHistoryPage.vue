@@ -7,7 +7,7 @@
             <div class="bg-white rounded-lg shadow mb-6">
                 <div class="flex border-b border-gray-200">
                     <button @click="activeTab = 'DELIVERED'" :class="[
-                        'flex-1 py-4 text-center font-semibold transition-colors relative',
+                        'flex-1 py-4 text-center font-semibold transition-colors relative cursor-pointer',
                         activeTab === 'DELIVERED'
                             ? 'text-green-600'
                             : 'text-gray-600 hover:text-gray-800'
@@ -18,7 +18,7 @@
                     </button>
                     <div class="w-px bg-gray-200"></div>
                     <button @click="activeTab = 'CANCELLED'" :class="[
-                        'flex-1 py-4 text-center font-semibold transition-colors relative',
+                        'flex-1 py-4 text-center font-semibold transition-colors relative cursor-pointer',
                         activeTab === 'CANCELLED'
                             ? 'text-red-600'
                             : 'text-gray-600 hover:text-gray-800'
@@ -31,12 +31,10 @@
             </div>
 
             <!-- Loading and Error State -->
-            <LoadingErrorState :isLoading="isLoading" :errorMessage="errorMessage"
-                loadingMessage="Đang tải lịch sử đơn hàng..." @reset-error="resetError" />
+            <LoadingErrorState :isLoading="isLoading" loadingMessage="Đang tải lịch sử đơn hàng..." />
 
             <!-- Empty State -->
-            <div v-if="!isLoading && !errorMessage && filteredOrders.length === 0"
-                class="text-center py-16 bg-white rounded-lg shadow">
+            <div v-if="!isLoading && filteredOrders.length === 0" class="text-center py-16 bg-white rounded-lg shadow">
                 <div class="mb-4">
                     <History class="mx-auto h-24 w-24 text-gray-400" />
                 </div>
@@ -57,8 +55,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted,computed } from 'vue'
+import { useRouter} from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useOrderStore } from '@/stores/orders'
 import { useReviewStore } from '@/stores/reviews'
@@ -69,11 +67,11 @@ import BackButton from '@/components/common/user/BackButton.vue'
 import { History } from 'lucide-vue-next'
 
 const router = useRouter()
-const route = useRoute()
+// const route = useRoute()
 const authStore = useAuthStore()
 const orderStore = useOrderStore()
 const reviewStore = useReviewStore()
-const { isLoading, errorMessage, executeAsync, resetError } = useAsyncOperation()
+const { isLoading, errorMessage, executeAsync } = useAsyncOperation()
 
 const orders = ref([])
 const activeTab = ref('DELIVERED')
@@ -89,7 +87,7 @@ const loadOrders = async () => {
 
     await executeAsync(async () => {
 
-        // Load orders từ store (reload để đảm bảo có dữ liệu mới nhất)
+        // Load orders từ store 
         await orderStore.getOrdersByUserIdStore(userId)
 
         // Lấy danh sách orders từ store
@@ -100,14 +98,15 @@ const loadOrders = async () => {
 
         // Sử dụng toUpperCase() để đảm bảo case-insensitive
         const rawOrders = allOrders.filter(order => {
-            const status = (order.status || '').toUpperCase()
-            const shippingStatus = (order.shipping_status || '').toUpperCase()
+            const status = order.status.toUpperCase()
+            const shippingStatus = order.shipping_status.toUpperCase()
 
             // Lấy các đơn đã giao (CONFIRMED + DELIVERED) hoặc đã hủy (CANCELLED status hoặc CANCELLED shipping_status)
             return (status === 'CONFIRMED' && shippingStatus === 'DELIVERED') ||
                 status === 'CANCELLED' ||
                 shippingStatus === 'CANCELLED'
         })
+        console.log('kiểm tra rawOrders lọc từ store:', rawOrders)
 
 
         if (rawOrders.length === 0) {
@@ -121,7 +120,8 @@ const loadOrders = async () => {
         for (const order of rawOrders) {
 
             // Kiểm tra xem order đã có order_details chưa (từ API getOrdersByUserId)
-            if (order.order_details && Array.isArray(order.order_details) && order.order_details.length > 0) {
+            if (order.order_details && order.order_details.length > 0) {
+
                 ordersWithDetails.push({
                     ...order,
                     order_details: order.order_details
@@ -129,36 +129,17 @@ const loadOrders = async () => {
                 continue
             }
 
-            try {
-                // Load order details cho từng order (tuần tự thay vì song song)
-                const detailsResponse = await orderStore.getOrderDetailsByOrderIdStore(order.order_id)
-
-                const orderDetails = detailsResponse?.data?.data || orderStore.currentOrderDetails || []
-
-                ordersWithDetails.push({
-                    ...order,
-                    order_details: orderDetails
-                })
-            } catch (error) {
-                console.error(`Error loading order details for order ${order.order_id}:`, error)
-                ordersWithDetails.push({
-                    ...order,
-                    order_details: []
-                })
-            }
         }
 
 
-        // Map orders với order details vào local ref (theo cấu trúc CategoryView)
         // Giữ nguyên tất cả fields của order, chỉ đảm bảo có order_details
         orders.value = ordersWithDetails.map((order) => ({
-            ...order, // Giữ nguyên tất cả fields
+            ...order, 
             order_details: order.order_details || []
         }))
+        console.log('kiểm tra dữ liệu sau map:', orders.value)
 
-
-
-        // Load user reviews riêng (có thể lỗi nhưng không ảnh hưởng đến orders)
+        // Load user reviews 
         try {
             await reviewStore.getReviewsByUserIdStore(userId)
         } catch (error) {
@@ -179,15 +160,15 @@ const filteredOrders = computed(() => {
     if (activeTab.value === 'DELIVERED') {
         // Tab "Đơn đã giao": hiển thị các đơn có status = CONFIRMED và shipping_status = DELIVERED
         return orders.value.filter(order => {
-            const status = (order.status || '').toUpperCase()
-            const shippingStatus = (order.shipping_status || '').toUpperCase()
+            const status = order.status.toUpperCase()
+            const shippingStatus = order.shipping_status.toUpperCase()
             return status === 'CONFIRMED' && shippingStatus === 'DELIVERED'
         })
     } else if (activeTab.value === 'CANCELLED') {
         // Tab "Đơn đã hủy": hiển thị các đơn có status = CANCELLED hoặc shipping_status = CANCELLED (giao thất bại)
         return orders.value.filter(order => {
-            const status = (order.status || '').toUpperCase()
-            const shippingStatus = (order.shipping_status || '').toUpperCase()
+            const status = order.status.toUpperCase()
+            const shippingStatus = order.shipping_status.toUpperCase()
             return status === 'CANCELLED' || shippingStatus === 'CANCELLED'
         })
     }
@@ -198,11 +179,12 @@ onMounted(() => {
     loadOrders()
 })
 
-// Reload khi route thay đổi (ví dụ quay lại từ OrderPage)
-watch(() => route.path, (newPath, oldPath) => {
-    if (newPath.includes('/order-history') && oldPath && oldPath !== newPath) {
-        console.log('🔄 Route changed to order-history, reloading orders...')
-        loadOrders()
-    }
-}, { immediate: false })
+// Reload khi route thay đổi 
+// watch(() => route.path, (newPath, oldPath) => {
+//     console.log('PATH:', oldPath, '=>', newPath)
+//     if (newPath.includes('/order-history') && oldPath && oldPath !== newPath) {
+//         console.log('Route changed to order-history, reloading orders...')
+//         loadOrders()
+//     }
+// }, { immediate: false })
 </script>

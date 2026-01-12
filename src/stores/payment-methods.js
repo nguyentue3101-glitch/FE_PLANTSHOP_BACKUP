@@ -39,7 +39,7 @@ export const usePaymentMethodStore = defineStore("paymentMethod", () => {
             return methodName === 'COD' ? 1 : 2 // Fallback: COD = 1, MOMO = 2
         }
 
-        const methodId = method.method_id || method.id
+        const methodId = method.method_id 
         return methodId
     }
 

@@ -133,13 +133,13 @@ const props = defineProps({
     // Accessors cho các trường 
     getCategoryId: { type: Function, default: (p) => p?.category_id },
     getName: { type: Function, default: (p) => p?.product_name },
-    getDescription: { type: Function, default: (p) => p?.description || '' },
+    // getDescription: { type: Function, default: (p) => p?.description || '' },
     getPrice: { type: Function, default: (p) => p?.price ?? 0 },
 
     // Phân trang
-    modelValue: { type: Number, default: 1 },
-    pageSize: { type: Number, default: 0 },
-    maxVisible: { type: Number, default: 5 },
+    modelValue: { type: Number, default: 1 }, //trang hiện tại
+    pageSize: { type: Number, default: 0 }, //số item
+    maxVisible: { type: Number, default: 5 }, //số trang hiển thị
     showSummary: { type: Boolean, default: true },
     scrollToTop: { type: Boolean, default: true },
 
@@ -174,26 +174,25 @@ const router = useRouter()
 
 // Lọc + tìm kiếm
 const filteredItems = computed(() => {
+    //lọc theo trạng thái sản phẩm
     let sourceItems
     if (props.selectedActive === 'deactive') {
         sourceItems = props.items2 ? [...props.items2] : []
     } else if (props.selectedActive === 'out_of_stock') {
-        // Nếu selectedActive là 'out_of_stock', sử dụng items2 (đã được filter từ ProductView)
         sourceItems = props.items2 ? [...props.items2] : []
     } else {
         sourceItems = props.items ? [...props.items] : []
     }
-
     let result = sourceItems
-
+    //lọc theo danh mục
     if (props.selectedCategory) {
         result = result.filter((p) => props.getCategoryId(p) == props.selectedCategory)
     }
-
+    //lọc theo trạng thái đơn hàng (đánh giá ẩn/hiện)
     if (props.selectedStatus) {
         result = result.filter((p) => p.status === props.selectedStatus)
     }
-
+    //lọc theo trạng thái giao hàng
     if (props.selectedShippingStatus) {
         if (props.selectedShippingStatus === 'NOT_DELIVERED') {
             // Gộp các trạng thái chưa giao: UNDELIVERED, PREPARING_ORDER, SHIPPING
@@ -207,16 +206,16 @@ const filteredItems = computed(() => {
             result = result.filter((p) => p.shipping_status === props.selectedShippingStatus)
         }
     }
-
+    //lọc theo từ khóa tìm kiếm
     const q = String(props.searchQuery || '').toLowerCase().trim()
     if (q) {
         result = result.filter((p) => {
             const name = String(props.getName(p) || '').toLowerCase()
-            const description = String(props.getDescription(p) || '').toLowerCase()
-            return name.includes(q) || description.includes(q)
+            // const description = String(props.getDescription(p) || '').toLowerCase()
+            return name.includes(q) 
         })
     }
-
+    //sắp xếp theo giá, tên
     if (props.sortOption) {
         result = [...result].sort((a, b) => {
             switch (props.sortOption) {
@@ -255,7 +254,7 @@ computed(() => Math.min(currentPageComputed.value * props.pageSize, filteredItem
 const paginatedItems = computed(() => {
     const start = (currentPageComputed.value - 1) * props.pageSize
     const end = start + props.pageSize
-    return filteredItems.value.slice(start, end)
+    return filteredItems.value.slice(start, end) //pthuc slice lấy từ ptu thứ start và lấy ra end - start ptu 
 })
 
 //hiển thị số trang trên tổng trang
@@ -272,7 +271,7 @@ const visiblePages = computed(() => {
     return pages
 })
 
-//gửi emit cho cha cập nhật lại giá trị và cuộn lên đầu trang sau chuyển
+//sự kiện chuyển trang
 function goTo(p) {
     if (p < 1 || p > totalPages.value) return
     currentPageComputed.value = p
@@ -310,12 +309,12 @@ onMounted(() => {
     }
 })
 
-// emit sau chọn category
+// ==========================================các computed proxies để emit sự kiện cập nhật lên cha==========================================
 const selectedCategoryProxy = computed({
     get: () => props.selectedCategory,
     set: (v) => emit('update:selectedCategory', v),
 })
-//emit sau chọn option
+
 const sortOptionProxy = computed({
     get: () => props.sortOption,
     set: (v) => emit('update:sortOption', v),

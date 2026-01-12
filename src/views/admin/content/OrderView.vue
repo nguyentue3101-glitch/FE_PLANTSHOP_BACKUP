@@ -47,11 +47,7 @@
                         <template #cell-customer="{ item }">
                             {{ getCustomerName(item) }}
                         </template>
-                        <template #cell-note="{ item }">
-                            <span class="text-sm text-gray-600 max-w-xs truncate block" :title="getOrderNote(item)">
-                                {{ getOrderNote(item) }}
-                            </span>
-                        </template>
+
                         <template #cell-final_total="{ item }">
                             <span class="font-semibold text-green-600">{{ formatPrice(item.final_total || item.total)
                             }}</span>
@@ -85,8 +81,8 @@
                                     '[&>div>button:not(:first-child):not(:nth-child(2))]:hidden',
                                     (isOrderCompleted(item) || item.status === 'CANCELLED' || item.shipping_status === 'CANCELLED') && '[&>div>button:nth-child(2)]:hidden'
                                 ]">
-                                    <ButtonCommon :selected-active="''" :item="item" @view="openViewDetail"
-                                        @update="openUpdateStatusModal" />
+                                    <ButtonCommon :selected-active="''" :item="item"
+                                        @update="openUpdateStatusModal"  @view="openViewDetail"/>
                                 </div>
                             </div>
                         </template>
@@ -220,7 +216,7 @@ import DetailViewComponent from '@/components/common/admin/DetailViewComponent.v
 import NotificationModal from '@/components/common/admin/NotificationModal.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
-import { useShippingFee } from '@/composables/useShippingFee'
+// import { useShippingFee } from '@/composables/useShippingFee'
 import { useOrderStore } from '@/stores/orders'
 import { usePaymentStore } from '@/stores/payments'
 import { X } from 'lucide-vue-next'
@@ -233,7 +229,7 @@ const { isLoading, errorMessage, executeAsync, resetError } = useAsyncOperation(
 
 const orderStore = useOrderStore()
 const paymentStore = usePaymentStore()
-const { getShippingFeeFromOrder } = useShippingFee()
+// const { getShippingFeeFromOrder } = useShippingFee()
 
 // Status options cho filter
 const statusOptions = [
@@ -247,7 +243,7 @@ const shippingStatusOptions = [
     { value: 'CANCELLED', label: 'Giao thất bại' }
 ]
 
-// Computed để filter orders (chỉ filter theo search query, status filter được xử lý bởi DataPager)
+// Computed để filter orders
 const filteredOrders = computed(() => {
     let orders = orderStore.orders || []
 
@@ -257,8 +253,7 @@ const filteredOrders = computed(() => {
         orders = orders.filter(order => {
             const orderId = String(order.order_id || '').toLowerCase()
             const customerName = getCustomerName(order).toLowerCase()
-            const customerEmail = getCustomerEmail(order).toLowerCase()
-            return orderId.includes(query) || customerName.includes(query) || customerEmail.includes(query)
+            return orderId.includes(query) || customerName.includes(query) 
         })
     }
 
@@ -273,7 +268,8 @@ const loadOrders = async () => {
     await executeAsync(async () => {
         await Promise.all([
             orderStore.getAllOrdersStore(),
-            paymentStore.getAllPaymentsStore()
+            paymentStore.getAllPaymentsStore(),
+
         ])
     }, {
         defaultErrorMessage: 'Không thể tải danh sách đơn hàng!',
@@ -355,7 +351,7 @@ const getShippingStatusClass = (shippingStatus) => {
     return classMap[shippingStatus] || 'bg-gray-100 text-gray-800'
 }
 
-// Payment status helpers
+//================== Payment Helpers ==================//
 const getPaymentStatus = (order) => {
     if (!order) return null
     // Tìm payment từ paymentStore
@@ -364,8 +360,28 @@ const getPaymentStatus = (order) => {
         const oOrderId = order.order_id
         return pOrderId === oOrderId
     })
-    return payment?.status || order.payment?.status || null
+    return payment?.status
 }
+
+const getPaymentMethodId = (order) => {
+    if (!order) return null
+    // Tìm payment từ paymentStore
+    const payment = paymentStore.payments?.find(p => {
+        const pOrderId = p.order_id || p.order?.order_id
+        const oOrderId = order.order_id
+        return pOrderId === oOrderId
+    })
+    return payment?.method_id
+}
+
+const getPaymentMethodName = (order) => {
+    if (getPaymentMethodId(order) === 1) {
+        return 'COD'
+    } else {
+        return 'MOMO'
+    }
+}
+//==================================================//
 
 // Kiểm tra đơn hàng đã hoàn tất chưa
 const isOrderCompleted = (order) => {
@@ -411,25 +427,6 @@ const getCustomerName = (order) => {
     return 'Không có tên'
 }
 
-const getCustomerEmail = (order) => {
-    if (order.user?.email) return order.user.email
-    return 'Không có email'
-}
-
-// Lấy note từ order (có thể ở nhiều nơi)
-const getOrderNote = (order) => {
-    // Ưu tiên lấy từ order.note hoặc order.shipping_note
-    if (order.note) return order.note
-    if (order.shipping_note) return order.shipping_note
-
-    // Nếu không có, thử lấy từ order_details (nếu đã load)
-    if (order.order_details && order.order_details.length > 0) {
-        const note = order.order_details[0]?.note
-        if (note) return note
-    }
-
-    return 'Không có'
-}
 
 
 // View Detail Modal
@@ -438,54 +435,40 @@ const selectedOrder = ref(null)
 
 const openViewDetail = async (order) => {
     try {
-        // Load order details nếu chưa có
+        // Load order details 
         let orderDetails = order.order_details
         if (!orderDetails || orderDetails.length === 0) {
             await orderStore.getOrderDetailsByOrderIdStore(order.order_id)
             orderDetails = orderStore.currentOrderDetails || []
         }
 
-        // Tính tổng tạm tính từ order_details
-        const subTotal = orderDetails.reduce((sum, detail) => {
-            return sum + (detail.sub_total || (detail.price_at_order || detail.price || 0) * (detail.quantity || 0))
-        }, 0)
 
-        // Tính phí vận chuyển: ưu tiên từ DB, nếu không có thì tính lại
-        const shippingFee = getShippingFeeFromOrder(order, orderDetails)
+        // Tính phí vận chuyển
+        // const shippingFee = getShippingFeeFromOrder(order, orderDetails)
 
-        // Lấy note từ nhiều nguồn có thể - sử dụng function getOrderNote để đảm bảo tính nhất quán
-        // Tạo một object tạm với order_details để getOrderNote có thể lấy note từ order_details
-        const orderWithDetails = {
-            ...order,
-            order_details: orderDetails
-        }
-        const orderNote = getOrderNote(orderWithDetails)
 
-        // Lấy payment status
         const paymentStatus = getPaymentStatus(order)
+        const paymentMethodName = getPaymentMethodName(order)
+
+
 
         // Format order data for modal
         selectedOrder.value = {
             order_id: order.order_id,
             customer: order.shipping_name,
-            email: getCustomerEmail(order),
+            // email: getCustomerEmail(order),
             phone: order.shipping_phone,
             address: order.shipping_address,
-            note: orderNote,
-            total: order.total || subTotal,
-            discount: order.discount || 0,
+            note: orderDetails[0]?.note || 'Không có',
+            subtotal: order.total || 0,
             discount_amount: order.discount_amount || 0,
-            auto_discount_amount: order.auto_discount_amount || 0,
-            total_discount_amount: order.total_discount_amount || 0,
-            discount_code: order.discount_code || null,
-            shipping_fee: shippingFee,
-            final_total: order.final_total || order.total || 0,
+            shipping_fee: order.shipping_fee,
+            final_total: order.final_total,
             status: getStatusText(order.status),
             shipping_status: getShippingStatusText(order.shipping_status),
-            created_at: formatDate(order.created_at || order.order_date),
-            payment_method: order.payment?.method?.name || order.payment_method || 'COD',
+            created_at: formatDate(order.order_date),
+            payment_method: paymentMethodName,
             payment_status: paymentStatus,
-            payment_status_text: getPaymentStatusText(paymentStatus),
             order_details: orderDetails,
             deposit_required: order.deposit_required || false,
             deposit: order.deposit || null
@@ -597,8 +580,8 @@ const handleUpdateStatus = async () => {
             }
         }
 
-            // Không tự động cập nhật order status khi cập nhật shipping status
-            // Admin có thể cập nhật order status riêng nếu cần
+        // Không tự động cập nhật order status khi cập nhật shipping status
+        // Admin có thể cập nhật order status riêng nếu cần
         // } else if (statusType.value === 'payment') {
         //     if (!newPaymentStatus.value) {
         //         updateStatusError.value = 'Vui lòng chọn trạng thái giao dịch mới!'

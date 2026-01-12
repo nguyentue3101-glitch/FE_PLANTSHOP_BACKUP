@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { ref } from "vue"
 import { getDepositByOrderId } from "@/api/deposits/get"
-import { createDepositMoMoPayment } from "@/api/deposits/post"
+// import { createDepositMoMoPayment } from "@/api/deposits/post"
 
 export const useDepositStore = defineStore("deposit", () => {
     const deposits = ref([])
@@ -11,8 +11,6 @@ export const useDepositStore = defineStore("deposit", () => {
     const getDepositByOrderIdStore = async (orderId) => {
         try {
             const response = await getDepositByOrderId(orderId)
-            // apiClient interceptor đã unwrap response.data
-            // Parse response với nhiều trường hợp khác nhau
             let depositData = null
             
             // Trường hợp 1: Response có format {success: true, data: {...}}
@@ -35,21 +33,21 @@ export const useDepositStore = defineStore("deposit", () => {
     }
 
     // Tạo deposit MoMo payment
-    const createDepositMoMoPaymentStore = async (orderId, amount, orderInfo = null) => {
-        try {
-            const response = await createDepositMoMoPayment(orderId, amount, orderInfo)
-            // apiClient interceptor đã unwrap response.data
-            return response
-        } catch (error) {
-            console.error("Create deposit MoMo payment error:", error.message)
-            throw error
-        }
-    }
+    // const createDepositMoMoPaymentStore = async (orderId, amount, orderInfo = null) => {
+    //     try {
+    //         const response = await createDepositMoMoPayment(orderId, amount, orderInfo)
+    //         // apiClient interceptor đã unwrap response.data
+    //         return response
+    //     } catch (error) {
+    //         console.error("Create deposit MoMo payment error:", error.message)
+    //         throw error
+    //     }
+    // }
 
     return {
         deposits,
         currentDeposit,
         getDepositByOrderIdStore,
-        createDepositMoMoPaymentStore,
+        // createDepositMoMoPaymentStore,
     }
 })

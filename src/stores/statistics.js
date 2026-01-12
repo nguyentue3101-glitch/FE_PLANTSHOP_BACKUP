@@ -9,16 +9,14 @@ export const useStatisticsStore = defineStore("statistics", () => {
 
     /**
      * Lấy tổng số sản phẩm bán được theo tháng
-     * @param {number} year - Năm
-     * @param {number} month - Tháng (1-12)
      */
     const getTotalProductsSoldByMonthStore = async (year, month) => {
         loadingProductsSold.value = true
         try {
             const response = await getTotalProductsSoldByMonth(year, month)
-            console.log('📦 Total Products Sold By Month Response:', response)
-            console.log('📦 Response data:', response.data)
-            console.log('📦 Response data.data:', response.data?.data)
+            console.log(' Total Products Sold By Month Response:', response)
+            console.log(' Response data:', response.data)
+            console.log(' Response data.data:', response.data?.data)
             
             let total = 0
             
@@ -29,12 +27,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
                 }
             }
             
-            console.log('📦 Total products sold by month (final):', total)
+            console.log(' Total products sold by month (final):', total)
             totalProductsSoldByMonth.value = Number(total) || 0
-            console.log('✅ Store value after update:', totalProductsSoldByMonth.value)
+            console.log(' Store value after update:', totalProductsSoldByMonth.value)
             return response
         } catch (error) {
-            console.error("❌ Get total products sold by month error:", error)
+            console.error(" Get total products sold by month error:", error)
             totalProductsSoldByMonth.value = 0
             throw error
         } finally {
@@ -44,15 +42,14 @@ export const useStatisticsStore = defineStore("statistics", () => {
 
     /**
      * Lấy tổng số sản phẩm bán được theo năm
-     * @param {number} year - Năm
      */
     const getTotalProductsSoldByYearStore = async (year) => {
         loadingProductsSold.value = true
         try {
             const response = await getTotalProductsSoldByYear(year)
-            console.log('📦 Total Products Sold By Year Response:', response)
-            console.log('📦 Response data:', response.data)
-            console.log('📦 Response data.data:', response.data?.data)
+            console.log(' Total Products Sold By Year Response:', response)
+            console.log(' Response data:', response.data)
+            console.log(' Response data.data:', response.data?.data)
             
             let total = 0
             
@@ -63,12 +60,12 @@ export const useStatisticsStore = defineStore("statistics", () => {
                 }
             }
             
-            console.log('📦 Total products sold by year (final):', total)
+            console.log('Total products sold by year (final):', total)
             totalProductsSoldByYear.value = Number(total) || 0
-            console.log('✅ Store value after update:', totalProductsSoldByYear.value)
+            console.log(' Store value after update:', totalProductsSoldByYear.value)
             return response
         } catch (error) {
-            console.error("❌ Get total products sold by year error:", error)
+            console.error(" Get total products sold by year error:", error)
             totalProductsSoldByYear.value = 0
             throw error
         } finally {

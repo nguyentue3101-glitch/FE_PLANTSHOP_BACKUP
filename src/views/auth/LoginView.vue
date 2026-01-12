@@ -92,6 +92,7 @@ const handleGoogleLogin = async () => {
 
     // Redirect đến Google OAuth chọn email xác nhận
     window.location.href = authUrl
+    //sau khi chọn mail xác nhận xong nó sẽ redirect về trang GoogleCallbackView với code
   } catch (error) {
     console.error('Google login error:', error)
     alert('Có lỗi xảy ra khi đăng nhập Google: ' + error.message)

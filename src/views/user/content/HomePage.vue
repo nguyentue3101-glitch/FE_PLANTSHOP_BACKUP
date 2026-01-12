@@ -256,24 +256,18 @@ import { ref, computed, onMounted } from 'vue'
 import { useProductStore } from '@/stores/products'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-import { useOrderStore } from '@/stores/orders'
-import { usePaymentStore } from '@/stores/payments'
+// import { useOrderStore } from '@/stores/orders'
+// import { usePaymentStore } from '@/stores/payments'
 import { ChevronLeft, ChevronRight, CheckCircle, Layers, Users, Image, ShieldCheck, TrendingUp } from 'lucide-vue-next'
 
 const productStore = useProductStore()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
-const orderStore = useOrderStore()
-const paymentStore = usePaymentStore()
+// const orderStore = useOrderStore()
+// const paymentStore = usePaymentStore()
 
 const categories = ref([])
 const products = ref([])
-
-
-
-
-
-
 
 
 //===================================Category Featured===================================
@@ -403,91 +397,92 @@ const clearMoMoFlags = () => {
   sessionStorage.removeItem('momo_payment_timestamp')
 }
 
-const ensureOrderStatus = async (orderId, desiredStatus) => {
-  try {
-    const orderResp = await orderStore.getOrderByIdStore(orderId)
-    if (orderResp?.data?.success && orderResp.data.data) {
-      const currentStatus = orderResp.data.data.status
-      if (currentStatus !== desiredStatus) {
-        await orderStore.updateOrderStatusStore(orderId, desiredStatus)
-      }
-    }
-  } catch (error) {
-    console.error(`❌ HomePage - Lỗi khi cập nhật trạng thái đơn hàng ${orderId} -> ${desiredStatus}:`, error)
-  }
-}
+// const ensureOrderStatus = async (orderId, desiredStatus) => {
+//   try {
+//     const orderResp = await orderStore.getOrderByIdStore(orderId)
+//     if (orderResp?.data?.success && orderResp.data.data) {
+//       const currentStatus = orderResp.data.data.status
+//       if (currentStatus !== desiredStatus) {
+//         await orderStore.updateOrderStatusStore(orderId, desiredStatus)
+//       }
+//     }
+//   } catch (error) {
+//     console.error(` HomePage - Lỗi khi cập nhật trạng thái đơn hàng ${orderId} -> ${desiredStatus}:`, error)
+//   }
+// }
 
-const updatePaymentStatusIfNeeded = async (payment, targetStatus) => {
-  if (!payment) return
-  const paymentId = payment.payment_id || payment.id || payment.paymentId
-  const currentStatus = payment.status || payment.payment_status
-  if (paymentId && currentStatus !== targetStatus) {
-    await paymentStore.updatePaymentStatusStore(paymentId, targetStatus)
-  }
-}
+// const updatePaymentStatusIfNeeded = async (payment, targetStatus) => {
+//   if (!payment) return
+//   const paymentId = payment.payment_id || payment.id || payment.paymentId
+//   const currentStatus = payment.status || payment.payment_status
+//   if (paymentId && currentStatus !== targetStatus) {
+//     await paymentStore.updatePaymentStatusStore(paymentId, targetStatus)
+//   }
+// }
 
-// Hàm xử lý kết quả MoMo dựa trên trạng thái thực tế từ backend
-const handleMoMoPaymentReturn = async () => {
-  const momoOrderId = sessionStorage.getItem('momo_payment_order_id')
-  const momoTimestamp = sessionStorage.getItem('momo_payment_timestamp')
+// // Hàm xử lý kết quả MoMo dựa trên trạng thái thực tế từ backend
+// const handleMoMoPaymentReturn = async () => {
+//   const momoOrderId = sessionStorage.getItem('momo_payment_order_id')
+//   const momoTimestamp = sessionStorage.getItem('momo_payment_timestamp')
 
-  if (!momoOrderId || !momoTimestamp) return
+//   if (!momoOrderId || !momoTimestamp) return
 
-  const orderIdNum = parseInt(momoOrderId)
-  if (!orderIdNum) {
-    clearMoMoFlags()
-    return
-  }
+//   const orderIdNum = parseInt(momoOrderId)
+//   if (!orderIdNum) {
+//     clearMoMoFlags()
+//     return
+//   }
 
-  try {
-    console.log('🔍 HomePage - Kiểm tra trạng thái MoMo cho order:', orderIdNum)
-    const paymentResponse = await paymentStore.getPaymentByOrderIdStore(orderIdNum)
-    const payment = paymentResponse?.data?.data || null
-    const paymentStatus = payment?.status || payment?.payment_status
+//   try {
+//     console.log(' HomePage - Kiểm tra trạng thái MoMo cho order:', orderIdNum)
+//     const paymentResponse = await paymentStore.getPaymentByOrderIdStore(orderIdNum)
+//     const payment = paymentResponse?.data?.data || null
+//     const paymentStatus = payment?.status || payment?.payment_status
 
-    if (paymentStatus === 'SUCCESS') {
-      // Backend đã tự động cập nhật order status, không cần cập nhật ở frontend
-      // await ensureOrderStatus(orderIdNum, 'PENDING_CONFIRMATION')
-      clearMoMoFlags()
-      return
-    }
+//     if (paymentStatus === 'SUCCESS') {
+//       // Backend đã tự động cập nhật order status, không cần cập nhật ở frontend
+//       // await ensureOrderStatus(orderIdNum, 'PENDING_CONFIRMATION')
+//       clearMoMoFlags()
+//       return
+//     }
 
-    if (paymentStatus === 'FAILED') {
-      console.log('⚠️ HomePage - Payment FAILED, hủy đơn hàng')
-      await ensureOrderStatus(orderIdNum, 'CANCELLED')
-      await updatePaymentStatusIfNeeded(payment, 'FAILED')
-      clearMoMoFlags()
-      return
-    }
+//     if (paymentStatus === 'FAILED') {
+//       console.log(' HomePage - Payment FAILED, hủy đơn hàng')
+//       await ensureOrderStatus(orderIdNum, 'CANCELLED')
+//       await updatePaymentStatusIfNeeded(payment, 'FAILED')
+//       clearMoMoFlags()
+//       return
+//     }
 
-    // Nếu payment chưa có trạng thái cuối cùng, kiểm tra order status
-    const orderResp = await orderStore.getOrderByIdStore(orderIdNum)
-    const orderStatus = orderResp?.data?.data?.status
+//     // Nếu payment chưa có trạng thái cuối cùng, kiểm tra order status
+//     const orderResp = await orderStore.getOrderByIdStore(orderIdNum)
+//     const orderStatus = orderResp?.data?.data?.status
 
-    if (orderStatus === 'CONFIRMED' || orderStatus === 'DELIVERED') {
-      console.log('ℹ️ HomePage - Order đã ở trạng thái hoàn tất, không hủy.')
-      clearMoMoFlags()
-      return
-    }
+//     if (orderStatus === 'CONFIRMED' || orderStatus === 'DELIVERED') {
+//       console.log(' HomePage - Order đã ở trạng thái hoàn tất, không hủy.')
+//       clearMoMoFlags()
+//       return
+//     }
 
-    if (orderStatus === 'CANCELLED') {
-      console.log('ℹ️ HomePage - Order đã bị hủy trước đó.')
-      clearMoMoFlags()
-      return
-    }
+//     if (orderStatus === 'CANCELLED') {
+//       console.log(' HomePage - Order đã bị hủy trước đó.')
+//       clearMoMoFlags()
+//       return
+//     }
 
-    console.log('⏳ HomePage - Payment chưa có kết quả cuối, giữ nguyên đơn hàng.')
-    // Không xóa flags để PaymentReturnPage hoặc lần tải sau tiếp tục xử lý
-  } catch (error) {
-    console.error('❌ HomePage - Lỗi khi lấy trạng thái MoMo:', error)
-  }
-}
+//     console.log(' HomePage - Payment chưa có kết quả cuối, giữ nguyên đơn hàng.')
+//     // Không xóa flags để PaymentReturnPage hoặc lần tải sau tiếp tục xử lý
+//   } catch (error) {
+//     console.error(' HomePage - Lỗi khi lấy trạng thái MoMo:', error)
+//   }
+// }
 
 //===================================khởi tạo gọi api===================================
 // Load categories và products
 onMounted(async () => {
   // Kiểm tra và xử lý MoMo payment return trước
-  await handleMoMoPaymentReturn()
+  // await handleMoMoPaymentReturn()
+  clearMoMoFlags()
 
   try {
     await productStore.getCategories()

@@ -24,7 +24,7 @@ import CheckoutPage from "@/views/user/content/payment/CheckInfoPage.vue"
 import PaymentPage from "@/views/user/content/payment/PaymentPage.vue"
 import OrderPage from "@/views/user/content/order/OrderPage.vue"
 import OrderHistoryPage from "@/views/user/content/order/OrderHistoryPage.vue"
-import PaymentReturnPage from "@/views/user/content/payment/PaymentReturnPage.vue"
+// import PaymentReturnPage from "@/views/user/content/payment/PaymentReturnPage.vue"
 import ReviewPage from "@/views/user/content/ReviewPage.vue"
 import ProductDetailPage from "@/components/common/user/product/ProductDetailPage.vue"
 const router = createRouter({
@@ -172,18 +172,18 @@ const router = createRouter({
             requiresUser: true,
           },
         },
-        {
-          path: "payment/return",
-          name: "payment-return",
-          component:PaymentReturnPage,
-          meta: {
-            isShow: false,
-            title: "Kết quả thanh toán",
-            requiresAuth: false, // Không yêu cầu auth vì MoMo redirect về đây
-            requiresUser: false,
-          },
+        // {
+        //   path: "payment/return",
+        //   name: "payment-return",
+        //   component:PaymentReturnPage,
+        //   meta: {
+        //     isShow: false,
+        //     title: "Kết quả thanh toán",
+        //     requiresAuth: false, // Không yêu cầu auth vì MoMo redirect về đây
+        //     requiresUser: false,
+        //   },
       
-        },
+        // },
       ],
     },
     {

@@ -5,7 +5,6 @@ export const getInfoUser = async(token)=>{
         headers: {
             Authorization: `Bearer ${token}`,
         },
-        _skipRetry: true, // Đánh dấu để skip refresh token khi 401 (vì đây là request verify)
     })
     return response
 }

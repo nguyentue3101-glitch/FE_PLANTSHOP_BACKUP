@@ -3,8 +3,7 @@ import { useRouter } from 'vue-router'
 
 /**
  * Composable để quản lý modal yêu cầu đăng nhập
- * @returns {Object} State và methods để quản lý modal đăng nhập
- */
+  */
 export function useLoginModal() {
   const router = useRouter()
   const showLoginModal = ref(false)

@@ -16,7 +16,7 @@
                     provincesError ? 'border-red-300' : ''
                 ]">
                 <option :value="null">
-                    {{ isLoadingProvinces ? 'Đang tải...' : provincesError ? 'Không thể tải dữ liệu' : 'Chọn thành phố'
+                    {{ isLoadingProvinces ? 'Đang tải...' : provincesError ? 'Không thể tải dữ liệu' : 'Chọn tỉnh/thành phố'
                     }}
                 </option>
                 <option v-for="city in cities" :key="city.id" :value="city.id">
@@ -50,11 +50,11 @@
         <!-- Địa chỉ chi tiết (Input) -->
         <div>
             <label :for="`address-detail-${componentId}`" class="block text-gray-700 font-semibold mb-2">
-                Địa chỉ chi tiết <span v-if="required" class="text-red-500">*</span>
+                Địa chỉ<span v-if="required" class="text-red-500">*</span>
                 <span class="text-sm font-normal text-gray-500">(Số nhà, tên đường, phường/xã)</span>
             </label>
-            <textarea :id="`address-detail-${componentId}`" v-model="addressDetail" :required="required" rows="3"
-                :placeholder="addressPlaceholder || 'Ví dụ: 123 Đường ABC, Phường XYZ'" @input="handleAddressChange"
+            <textarea :id="`address-detail-${componentId}`" v-model="addressDetail" :required="required" rows="1"
+                :placeholder="addressPlaceholder " @input="handleAddressChange"
                 :class="[
                     'w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2',
                     focusRingClass
@@ -73,7 +73,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useProvinces } from '@/composables/useProvinces'
 
-// Tạo unique ID cho component (thay thế _uid trong Vue 3)
+// Tạo unique ID cho component tránh bug ngầm khi render lại component
 const componentId = ref(`address-selector-${Math.random().toString(36).substr(2, 9)}`)
 
 const props = defineProps({
@@ -88,8 +88,8 @@ const props = defineProps({
     },
     mode: {
         type: String,
-        default: 'user', // 'user' hoặc 'shipping'
-        validator: (value) => ['user', 'shipping'].includes(value)
+        default: 'shipping',
+        validator: (value) => ['shipping'].includes(value)
     },
     required: {
         type: Boolean,
@@ -107,13 +107,10 @@ const props = defineProps({
         type: String,
         default: ''
     },
-    showShippingNotice: {
-        type: Boolean,
-        default: false
-    }
+
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:modelValue'])
 
 // Sử dụng composable để quản lý dữ liệu tỉnh thành từ API
 const {
@@ -121,7 +118,6 @@ const {
     isLoading: isLoadingProvinces,
     error: provincesError,
     loadProvinces,
-    getDistrictsByProvinceCode,
     loadDistrictsForProvince,
     getProvinceByCode,
     getDistrictByCode
@@ -133,13 +129,28 @@ const selectedDistrictId = ref(null)
 const addressDetail = ref('')
 const errorMessage = ref('')
 
+// Khởi tạo
+onMounted(async () => {
+    // Load dữ liệu tỉnh thành từ API
+    try {
+        await loadProvinces()
+        console.log('đã lấy được danh sách tỉnh thành từ API')
+    } catch (err) {
+        if (err.message) {
+            errorMessage.value = `Không thể tải danh sách tỉnh thành: ${err.message}`
+
+        }
+    }
+
+})
+
 // Computed để lấy danh sách thành phố (từ API)
 const cities = computed(() => {
-    if (apiProvinces.value.length > 0) {
-        // Transform từ API format (code) sang format cũ (id) để tương thích
+    console.log("lấy danh sách thành phố ")
+    if (apiProvinces.value.length > 0) { 
+        console.log("danh sách tỉnh thành:", apiProvinces.value);
         return apiProvinces.value.map(province => ({
             id: province.code,
-            code: province.code,
             name: province.name
         }))
     }
@@ -149,78 +160,57 @@ const cities = computed(() => {
 // State để lưu districts đã load
 const loadedDistricts = ref([])
 
-// Computed để lấy danh sách quận/huyện theo thành phố đã chọn
+// lấy danh sách quận huyện 
 const districts = computed(() => {
     if (!cityId.value) {
-        loadedDistricts.value = []
         return []
     }
-    // Trả về districts đã load (sẽ được update bởi watch)
     return loadedDistricts.value
 })
 
 // Watch cityId để load districts khi thay đổi
+//immediate: false => watch chỉ chạy khi cityId thay đổi
 watch(cityId, async (newCityId) => {
     if (!newCityId) {
         loadedDistricts.value = []
         return
     }
 
-    console.log(`🔄 Loading districts for cityId ${newCityId}...`)
+    console.log(`mã thành phố: ${newCityId}...`)
     try {
-        // Thử lấy từ cache trước
-        let apiDistricts = getDistrictsByProvinceCode(newCityId)
-
-        // Nếu chưa có trong cache, load từ API
-        if (apiDistricts.length === 0) {
-            apiDistricts = await loadDistrictsForProvince(newCityId)
-        }
+        // loadDistrictsForProvince tự động kiểm tra cache và gọi API nếu cần
+        const apiDistricts = await loadDistrictsForProvince(newCityId)
 
         loadedDistricts.value = apiDistricts.map(district => ({
             id: district.code,
             code: district.code,
-            name: district.name, // Name đầy đủ từ API (ví dụ: "Thành phố Bà Rịa", "Thành phố Vũng Tàu")
-            division_type: district.division_type
+            name: district.name, 
+            division_type: district.type
         }))
-        console.log(`✅ Loaded ${loadedDistricts.value.length} districts for cityId ${newCityId}`)
-        console.log('📋 Sample districts:', loadedDistricts.value.slice(0, 3).map(d => d.name))
+        console.log(`Loaded được ${loadedDistricts.value.length} districts cho mã cityId ${newCityId}`)
+        console.log('Sample districts:', loadedDistricts.value.slice(0, 3).map(d => d.name))
     } catch (err) {
-        console.error('❌ Error loading districts:', err)
+        console.error('Error loading districts:', err)
         loadedDistricts.value = []
     }
 }, { immediate: false })
 
-// Computed để lấy tên thành phố hiện tại
-const cityName = computed(() => {
-    if (!cityId.value) return ''
-    const province = getProvinceByCode(cityId.value)
-    return province ? province.name : ''
-})
 
-// Computed
+// theo dõi sự thay đổi của full address
 const fullAddress = computed(() => {
     if (!addressDetail.value || !selectedDistrictId.value || !cityId.value) return ''
 
+    const provinces = getProvinceByCode(cityId.value)
+    const cityName = provinces ? provinces.name : ''
     const district = getDistrictByCode(selectedDistrictId.value)
     const districtName = district ? district.name : ''
 
-    if (!districtName || !cityName.value) return ''
+    if (!districtName || !cityName) return ''
 
-    return `${addressDetail.value.trim()}, ${districtName}, ${cityName.value}`.trim()
+    return `${addressDetail.value.trim()}, ${districtName}, ${cityName}`.trim()
 })
 
-// Không cần load cities/districts nữa vì dùng dữ liệu cố định
-// Chỉ cần reset districts khi đổi thành phố
-const loadDistricts = (cityIdParam) => {
-    if (!cityIdParam) {
-        // Reset districts khi không có thành phố
-        selectedDistrictId.value = null
-        return
-    }
 
-    // Reset district selection khi load quận/huyện mới
-    selectedDistrictId.value = null
-}
 
 // Xử lý khi thay đổi thành phố
 const handleCityChange = () => {
@@ -246,7 +236,6 @@ const emitChange = () => {
     const selectedDistrict = getDistrictByCode(selectedDistrictId.value)
 
     if (props.mode === 'shipping') {
-        // Mode shipping: emit fullAddress
         const newValue = {
             fullAddress: fullAddress.value,
             address: addressDetail.value,
@@ -254,101 +243,26 @@ const emitChange = () => {
             city_id: cityId.value,
             district_name: selectedDistrict ? selectedDistrict.name : null
         }
+        console.log("giá trị mới", newValue);
         emit('update:modelValue', newValue)
-        emit('change', newValue)
-    } else {
-        // Mode user: emit address, district_id, city_id riêng lẻ
-        const newValue = {
-            address: addressDetail.value,
-            district_id: selectedDistrictId.value,
-            city_id: cityId.value
-        }
-        emit('update:modelValue', newValue)
-        emit('change', newValue)
-    }
+        // emit('change', newValue)
+    } 
 }
 
 // Watch modelValue để đồng bộ từ bên ngoài
-watch(() => props.modelValue, (newValue) => {
-    if (newValue) {
-        // Đồng bộ city_id
-        if (newValue.city_id && newValue.city_id !== cityId.value) {
-            cityId.value = newValue.city_id
-        }
+//xử lý ngay khi component mở 
+// watch(() => props.modelValue, (newValue) => {
+//     if (newValue) {
+//         // Đồng bộ city_id
+//         if (newValue.city_id && newValue.city_id !== cityId.value) {
+//             cityId.value = newValue.city_id
+//         }
 
-        // Parse địa chỉ nếu là fullAddress (mode shipping)
-        // Lưu ý: Địa chỉ chi tiết (addressDetail) không tự động lấy từ modelValue.address
-        // Chỉ set district_id và city_id, để người dùng nhập địa chỉ chi tiết mới
-        if (props.mode === 'shipping') {
-            // Chỉ set district_id và city_id, không set addressDetail
-            selectedDistrictId.value = newValue.district_id || null
-        } else {
-            // Mode user: chỉ set district_id và city_id
-            selectedDistrictId.value = newValue.district_id || null
-        }
-    }
-}, { deep: true, immediate: true })
+//         if (props.mode === 'shipping') {
+//             selectedDistrictId.value = newValue.district_id || null
+//         }
+//     }
+// }, { deep: true, immediate: true })
 
-// Khởi tạo
-onMounted(async () => {
-    // Load dữ liệu tỉnh thành từ API
-    try {
-        await loadProvinces()
-        console.log('✅ Loaded provinces from API')
-    } catch (err) {
-        console.error('❌ Failed to load provinces from API:', err)
-        // Hiển thị thông báo lỗi cho người dùng
-        if (err.message) {
-            errorMessage.value = `Không thể tải danh sách tỉnh thành: ${err.message}`
-        } else if (err.response?.status === 502) {
-            errorMessage.value = 'API đang gặp sự cố. Vui lòng thử lại sau.'
-        } else if (err.code === 'ERR_NETWORK' || err.message?.includes('CORS')) {
-            errorMessage.value = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.'
-        } else {
-            errorMessage.value = 'Không thể tải danh sách tỉnh thành. Vui lòng thử lại sau.'
-        }
-    }
 
-    // Nếu đã có city_id trong modelValue, sử dụng nó
-    if (props.modelValue?.city_id) {
-        cityId.value = props.modelValue.city_id
-
-        // Load districts cho city_id này
-        try {
-            // Thử lấy từ cache trước
-            let apiDistricts = getDistrictsByProvinceCode(props.modelValue.city_id)
-
-            // Nếu chưa có trong cache, load từ API
-            if (apiDistricts.length === 0) {
-                apiDistricts = await loadDistrictsForProvince(props.modelValue.city_id)
-            }
-
-            loadedDistricts.value = apiDistricts.map(district => ({
-                id: district.code,
-                code: district.code,
-                name: district.name, // Name đầy đủ từ API (ví dụ: "Thành phố Bà Rịa", "Thành phố Vũng Tàu")
-                division_type: district.division_type
-            }))
-            console.log(`✅ Loaded ${loadedDistricts.value.length} districts on mount for cityId ${props.modelValue.city_id}`)
-            console.log('📋 Sample districts:', loadedDistricts.value.slice(0, 5).map(d => `${d.name} (${d.division_type})`))
-        } catch (err) {
-            console.error('Error loading districts on mount:', err)
-        }
-
-        // Set district_id nếu có
-        if (props.modelValue.district_id) {
-            // Đợi một chút để districts được tính toán
-            await new Promise(resolve => setTimeout(resolve, 200))
-            const exists = districts.value.some(d => d.id === props.modelValue.district_id)
-            if (exists) {
-                selectedDistrictId.value = props.modelValue.district_id
-            }
-        }
-    }
-
-    // Lưu ý: Địa chỉ chi tiết không được tự động lấy từ modelValue
-    // Người dùng phải nhập địa chỉ chi tiết mới mỗi lần
-
-    // Mặc định: cityId và selectedDistrictId là null để hiển thị placeholder
-})
 </script>

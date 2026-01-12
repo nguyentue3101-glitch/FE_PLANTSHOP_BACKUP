@@ -41,6 +41,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search } from 'lucide-vue-next'
 import { useProductStore } from '@/stores/products'
+import { normalizeString } from '@/utils/normalizeString' 
 
 const props = defineProps({
     modelValue: {
@@ -117,13 +118,24 @@ const products = computed(() => {
     return productStore.products || []
 })
 
+// Normalized products (precompute normalized name for faster search)
+const normalizedProducts = computed(() => {
+    return products.value.map(product => {
+        const name = product.product_name || product.name || ''
+        return {
+            ...product,
+            _nameNorm: normalizeString(name)
+        }
+    })
+})
+
 // Handle input change
 const handleInput = (event) => {
     const value = event.target.value
     emit('update:modelValue', value)
-
-    // Khi xóa từ khóa (value rỗng), navigate với category hiện tại (nếu có)
-    if (props.mode === 'user' && !value.trim()) {
+    const currentRoute = router.currentRoute.value
+    // Khi xóa từ khóa (value rỗng), thì trả về query ban đầu  
+    if (props.mode === 'user' && !value.trim() && currentRoute.path === '/product') {
         const currentCategory = router.currentRoute.value.query.category
         const queryParams = {}
         // Giữ category nếu có để hiển thị sản phẩm thuộc danh mục đó
@@ -137,6 +149,7 @@ const handleInput = (event) => {
         })
     }
 
+    //xử lý khi có gợi ý
     if (props.mode === 'user' && props.showSuggestions && value.trim()) {
         isSuggestionsVisible.value = true
         updateSuggestions()
@@ -164,19 +177,18 @@ const handleEnter = () => {
 
 // Update suggestions based on search query
 const updateSuggestions = () => {
-    const query = props.modelValue.toLowerCase().trim()
-    if (!query) {
+    const q = normalizeString(props.modelValue)
+    if (!q) {
         suggestions.value = []
         return
     }
 
-    // Filter products by name
-    const filtered = products.value.filter(product => {
-        const productName = getProductName(product).toLowerCase()
-        return productName.includes(query)
+    // Filter products by normalized name
+    const filtered = normalizedProducts.value.filter(product => {
+        return product._nameNorm.includes(q)
     })
 
-    // Limit to 5 suggestions
+    // Limit to 8 suggestions
     suggestions.value = filtered.slice(0, 8)
 }
 
@@ -218,7 +230,7 @@ const handleSearch = () => {
 //     }
 // }
 
-// Select suggestion
+// xử lý khi bấm vào sản phẩm tìm kiếm
 const selectSuggestion = (product) => {
     const productId = product.product_id
     if (!productId) {
@@ -232,7 +244,7 @@ const selectSuggestion = (product) => {
     emit('update:modelValue', getProductName(product))
 }
 
-// Handle click outside
+//xử lý click bên ngoài
 const handleClickOutside = (event) => {
     if (searchContainer.value && !searchContainer.value.contains(event.target)) {
         isSuggestionsVisible.value = false
@@ -249,7 +261,7 @@ const getProductImage = (product) => {
 
 const getProductName = (product) => {
     if (!product) return 'Sản phẩm không xác định'
-    return product.product_name || product.name || 'Sản phẩm'
+    return product.product_name 
 }
 
 const formatPrice = (price) => {
@@ -287,6 +299,7 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
 
 // Load products for suggestions if needed (chỉ cho user mode)
 onMounted(async () => {
+    console.log("khỏi tạo công cụ tìm kiếm")
     if (props.mode === 'user') {
         await loadCategories()
 

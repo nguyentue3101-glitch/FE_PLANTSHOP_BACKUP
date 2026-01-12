@@ -93,7 +93,7 @@ export function useCartAnimation() {
         flyImage.className = 'fly-to-cart'
         document.body.appendChild(flyImage)
 
-        // Tạo keyframes animation giống Shopee
+        // Tạo keyframes animation 
         const keyframes = [
             {
                 left: `${startX}px`,

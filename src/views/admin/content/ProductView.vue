@@ -29,13 +29,33 @@
             <h2 class="text-2xl font-bold mb-2">
                 DANH SÁCH SẢN PHẨM
             </h2>
-            <DataPager v-model="currentPageActive" v-model:selectedCategory="selectedCategory"
-                v-model:sortOption="sortOption" :items="filteredActiveProducts" :items2="getItemsForPager"
-                :page-size="PAGE_SIZE" :search-query="searchQuery" :selected-category="selectedCategory"
-                :selected-active="selectedActive" :sort-option="sortOption" :show-filter="true"
-                :show-category-filter="true" :show-sort-option="true" :show-active="true" :use-product-labels="true"
-                @update:selectedActive="selectedActive = $event" :category-options="categories" :sync-route="true"
-                route-query-key="category" controls-class="mb-2 ">
+            <DataPager 
+            v-model="currentPageActive" 
+            v-model:selectedCategory="selectedCategory"
+                
+            v-model:sortOption="sortOption" 
+            :items="filteredActiveProducts" 
+            :items2="getItemsForPager"
+                
+            :page-size="PAGE_SIZE" 
+            :search-query="searchQuery"
+             :selected-category="selectedCategory"
+                
+             :selected-active="selectedActive" 
+             :sort-option="sortOption" 
+             :show-filter="true"
+                
+             :show-category-filter="true" 
+             :show-sort-option="true" 
+             :show-active="true" 
+             :use-product-labels="true"
+               
+             @update:selectedActive="selectedActive = $event" 
+             :category-options="categories" 
+             :sync-route="true"
+                
+             route-query-key="category" 
+             controls-class="mb-2 ">
                 <!-- nhận item từ con qua slot #default -->
                 <template #default="{ items }">
                     <CommonTable :headers="['ID', 'TÊN SẢN PHẨM', 'HÌNH ẢNH', 'KÍCH THƯỚC', 'GIÁ', 'SỐ LƯỢNG']"
@@ -133,7 +153,7 @@ const getItemsForPager = computed(() => {
     return dataDeactiveProduct.value
 })
 
-// Search handler
+// mặc định bắt đầu từ trang 1 khi tìm kiếm
 const handleSearch = () => {
     currentPageActive.value = 1
 }
@@ -217,6 +237,7 @@ const selectedProductForUpdate = ref(null)
 const { executeAsync: executeUpdateAsync, isLoading: isUpdating } = useAsyncOperation()
 
 const openUpdateModal = (item) => {
+    console.log('Open update modal for item:', item)
     selectedProductForUpdate.value = { ...item }
     showUpdateModal.value = true
     updateError.value = ''
@@ -359,7 +380,7 @@ const closeViewModal = () => {
 
 // =======================================field ===================================
 const productFields = computed(() => [
-    { key: 'product_id', label: 'ID', type: 'text' },
+    { key: 'product_id', label: 'Mã Sản Phẩm', type: 'text' },
     { key: 'product_name', label: 'Tên sản phẩm', type: 'text', required: true, placeholder: 'Nhập tên sản phẩm' },
     {
         key: 'category_id', label: 'Danh mục', type: 'select', required: true,

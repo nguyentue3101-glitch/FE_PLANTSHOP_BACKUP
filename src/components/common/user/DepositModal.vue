@@ -52,7 +52,7 @@
                             <!-- Debug info -->
                             <div v-if="depositPayment && !depositPayment.amount && !depositPayment.payUrl"
                                 class="bg-red-50 border border-red-300 rounded p-3 text-sm text-red-700">
-                                ⚠️ Thiếu thông tin thanh toán. Vui lòng liên hệ cửa hàng.
+                                Thiếu thông tin thanh toán. Vui lòng kiểm tra lại thông tin.
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-700">Số tiền cần đặt cọc:</span>
@@ -60,14 +60,6 @@
                                     depositPayment?.amount ? formatCurrency(depositPayment.amount)
                                         : (depositAmount > 0 ? formatCurrency(depositAmount) : 'Đang tải...')
                                 }}</span>
-                            </div>
-
-                            <!-- QR Code (chỉ hiển thị sau khi tạo đơn và có depositPayment) -->
-                            <div v-if="depositPayment && depositPayment.qrCodeUrl"
-                                class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-sm text-gray-600 mb-2">Quét mã QR để thanh toán</p>
-                                <img :src="depositPayment.qrCodeUrl" alt="QR Code"
-                                    class="w-48 h-48 border-2 border-gray-300 rounded" />
                             </div>
 
                             <!-- Nút thanh toán -->
@@ -102,28 +94,6 @@
                                 <p class="text-sm text-yellow-800">Đang tải thông tin thanh toán...</p>
                             </div>
                         </div>
-
-                        <!-- Trạng thái đã đặt cọc -->
-                        <div v-if="deposit && deposit.paid" class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-green-800">
-                                        Đã đặt cọc thành công
-                                    </p>
-                                    <p class="mt-1 text-sm text-green-700">
-                                        Đơn hàng của bạn đã được đặt cọc. Đơn hàng sẽ được xử lý trong thời gian sớm
-                                        nhất.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -132,10 +102,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useOrderStore } from '@/stores/orders'
 import { useAuthStore } from '@/stores/auth'
-import { useUserStore } from '@/stores/user'
+// import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { useDragModal } from '@/composables/useDragModal'
 
@@ -173,7 +143,7 @@ const emit = defineEmits(['close', 'payment', 'order-created'])
 const isProcessing = ref(false)
 const orderStore = useOrderStore()
 const authStore = useAuthStore()
-const userStore = useUserStore()
+// const userStore = useUserStore()
 const cartStore = useCartStore()
 // Drag functionality để di chuyển modal
 const modalRef = ref(null)
@@ -197,39 +167,16 @@ const handlePayment = async () => {
     isProcessing.value = true
 
     try {
-        // Nếu đã có orderId, chỉ mở link thanh toán
-        if (props.orderId) {
-            if (!props.depositPayment) {
-                throw new Error('Không tìm thấy thông tin thanh toán')
-            }
-
-            // Kiểm tra nếu là mobile, dùng deeplink, nếu không dùng payUrl
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            const paymentUrl = isMobile && props.depositPayment.deeplink
-                ? props.depositPayment.deeplink
-                : props.depositPayment.payUrl
-
-            if (!paymentUrl) {
-                throw new Error('Không tìm thấy link thanh toán')
-            }
-
-            // Lưu orderId vào sessionStorage để xử lý redirect
-            sessionStorage.setItem('deposit_order_id', props.orderId.toString())
-
-            // Mở link thanh toán
-            window.location.href = paymentUrl
-            return
-        }
-
-        // Nếu chưa có orderId, tạo đơn hàng trước
+      
+        // BƯỚC 1. Kiểm tra thông tin đặt cọc
         if (!props.orderData) {
-            console.log('💰 Chưa có orderData, emit payment event để xử lý ở parent...')
+            console.log('Chưa có thông tin để đặt cọc')
             emit('payment')
             isProcessing.value = false
             return
         }
 
-        console.log('💰 Tạo đơn hàng để đặt cọc...', {
+        console.log('Tạo đơn hàng để đặt cọc...', {
             orderItemsCount: props.orderData.items?.length || 0,
             paymentMethod: props.orderData.payment?.method_id,
             depositAmount: props.depositAmount
@@ -240,13 +187,13 @@ const handlePayment = async () => {
             throw new Error('Vui lòng đăng nhập lại!')
         }
 
-        // Tạo đơn hàng
+        // BƯỚC 2.Tạo đơn hàng
         const response = await orderStore.createNewOrder(props.orderData)
 
         if (response.data.success) {
             // Lấy order data từ response
             const orderDataFromResponse = response.data.data
-            const orderId = orderDataFromResponse?.order_id || response.data.order_id || orderDataFromResponse?.id
+            const orderId = orderDataFromResponse?.order_id 
 
             if (!orderId) {
                 throw new Error('Không thể lấy order ID từ response!')
@@ -257,8 +204,8 @@ const handlePayment = async () => {
             const deposit = orderDataFromResponse?.deposit || null
             const depositPayment = orderDataFromResponse?.deposit_payment || null
 
-            console.log('✅ Order created for deposit, orderId:', orderId)
-            console.log('💰 Deposit info:', {
+            console.log(' Order created for deposit, orderId:', orderId)
+            console.log(' Deposit info:', {
                 depositRequired,
                 deposit,
                 depositPayment
@@ -278,11 +225,8 @@ const handlePayment = async () => {
             }
 
             // Mở link thanh toán MoMo
-            if (depositPayment?.payUrl || depositPayment?.deeplink) {
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-                const paymentUrl = isMobile && depositPayment.deeplink
-                    ? depositPayment.deeplink
-                    : depositPayment.payUrl
+            if (depositPayment?.payUrl ) {
+                const paymentUrl = depositPayment.payUrl
 
                 if (paymentUrl) {
                     // Lưu orderId vào sessionStorage để xử lý redirect
@@ -322,29 +266,23 @@ const formatCurrency = (amount) => {
 }
 
 // Lock body scroll khi modal mở và unlock khi đóng
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        // Lock body scroll
-        document.body.style.overflow = 'hidden'
-        console.log('🔔 DepositModal is showing:', {
-            show: props.show,
-            deposit: props.deposit,
-            depositPayment: props.depositPayment,
-            orderId: props.orderId
-        })
-        // Debug: Kiểm tra xem modal có trong DOM không
-        setTimeout(() => {
-            const modalElement = document.querySelector('[data-deposit-modal]')
-            console.log('🔍 Modal element in DOM:', modalElement)
-            if (!modalElement) {
-                console.error('❌ Modal không có trong DOM!')
-            }
-        }, 100)
-    } else {
-        // Unlock body scroll
-        document.body.style.overflow = ''
-    }
-}, { immediate: true })
+// watch(() => props.show, (newVal) => {
+//     if (newVal) {
+//         // Lock body scroll
+//         document.body.style.overflow = 'hidden'
+//         setTimeout(() => {
+//             const modalElement = document.querySelector('[data-deposit-modal]')
+//             console.log('🔍 Modal element in DOM:', modalElement)
+//             if (!modalElement) {
+//                 console.error('❌ Modal không có trong DOM!')
+//             }
+//         }, 100)
+//     } else {
+//         // Unlock body scroll
+//         document.body.style.overflow = ''
+//     }
+// }, { immediate: true })
+
 
 // Cleanup khi component unmount
 onUnmounted(() => {

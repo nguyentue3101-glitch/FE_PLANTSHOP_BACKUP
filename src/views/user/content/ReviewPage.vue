@@ -138,7 +138,7 @@ const { isLoading, errorMessage, executeAsync, resetError } = useAsyncOperation(
 const currentOrder = ref(null)
 const productsToReview = ref([])
 
-// Load products from specific order
+// lấy danh sách sản phẩm trong đơn hàng để đánh giá
 const loadProductsToReview = async () => {
     const userId = authStore.userId
     const orderId = route.params.orderId
@@ -178,17 +178,17 @@ const loadProductsToReview = async () => {
 
         currentOrder.value = order
 
-        // Load order details if not already loaded
+        // lấy chi tiết đơn hàng nếu có lỗi
         if (!order.order_details || order.order_details.length === 0) {
             await orderStore.getOrderDetailsByOrderIdStore(order.order_id)
             order.order_details = orderStore.currentOrderDetails
         }
 
-        // Load user reviews once
+        // lấy danh sách đánh giá của user
         await reviewStore.getReviewsByUserIdStore(userId)
         const userReviews = reviewStore.userReviews || []
 
-        // Extract products from order details
+        // Tạo danh sách productsToReview
         productsToReview.value = []
 
         if (order.order_details && order.order_details.length > 0) {
@@ -196,7 +196,6 @@ const loadProductsToReview = async () => {
                 const productId = detail.product?.product_id || detail.product_id
                 const orderDetailId = detail.order_detail_id
 
-                // Check if user has already reviewed this order_detail_id (not product_id)
                 // Mỗi lần mua (mỗi order_detail_id) sẽ có một đánh giá riêng
                 const existingReview = userReviews.find(
                     r => {
@@ -231,7 +230,7 @@ const loadProductsToReview = async () => {
     })
 }
 
-// Check if single review can be submitted
+// Kiểm tra xem có thể submit đánh giá cho từng sản phẩm hay không
 const canSubmitSingle = (productItem) => {
     return productItem.rating > 0
 }
@@ -243,7 +242,6 @@ const handleCreateReview = async (productItem) => {
         return
     }
 
-    // Validate order_detail_id before creating review
     if (!productItem.order_detail_id) {
         productItem.reviewError = 'Không tìm thấy thông tin chi tiết đơn hàng!'
         return
@@ -262,20 +260,20 @@ const handleCreateReview = async (productItem) => {
 
 
         await reviewStore.createReviewStore(reviewData)
-        console.log('✅ Đã tạo đánh giá mới thành công')
+        console.log('Đã tạo đánh giá mới thành công')
 
         // Reset editing state
         productItem.isEditing = false
         productItem.editingReviewId = null
 
-        // Reload user reviews and products to update hasReview status
+        // tải lại đánh giá của user và sản phẩm để cập nhật trạng thái hasReview
         const userId = authStore.userId
         if (userId) {
             await reviewStore.getReviewsByUserIdStore(userId)
         }
         await loadProductsToReview()
     } catch (error) {
-        console.error('❌ Lỗi khi tạo đánh giá:', error)
+        console.error(' Lỗi khi tạo đánh giá:', error)
         productItem.reviewError = error.response?.data?.message || error.message || 'Không thể tạo đánh giá!'
     } finally {
         productItem.isSubmitting = false
@@ -297,9 +295,7 @@ const handleUpdateReview = async (productItem) => {
 
     // Lấy review_id từ editingReviewId hoặc existingReview
     const reviewId = productItem.editingReviewId ||
-        productItem.existingReview?.review_id ||
-        productItem.existingReview?.id ||
-        null
+        productItem.existingReview?.review_id 
 
     if (!reviewId) {
         productItem.reviewError = 'Không tìm thấy mã đánh giá để cập nhật!'
@@ -317,25 +313,21 @@ const handleUpdateReview = async (productItem) => {
             comment: productItem.comment || ''
         }
 
-        console.log('🔄 Cập nhật đánh giá với review_id:', reviewId)
-        console.log('📤 Gọi API UPDATE:', `/api/reviews/${reviewId}`)
-        console.log('📦 Review data:', reviewData)
-
         await reviewStore.updateReviewStore(reviewId, reviewData)
-        console.log('✅ Đã cập nhật đánh giá thành công')
+        console.log(' Đã cập nhật đánh giá thành công')
 
         // Reset editing state
         productItem.isEditing = false
         productItem.editingReviewId = null
 
-        // Reload user reviews and products to update hasReview status
+        // tải lại đánh giá của user và sản phẩm để cập nhật trạng thái hasReview
         const userId = authStore.userId
         if (userId) {
             await reviewStore.getReviewsByUserIdStore(userId)
         }
         await loadProductsToReview()
     } catch (error) {
-        console.error('❌ Lỗi khi cập nhật đánh giá:', error)
+        console.error('Lỗi khi cập nhật đánh giá:', error)
         productItem.reviewError = error.response?.data?.message || error.message || 'Không thể cập nhật đánh giá!'
     } finally {
         productItem.isSubmitting = false
@@ -346,7 +338,7 @@ const handleUpdateReview = async (productItem) => {
 const handleEditReview = (productItem) => {
     if (productItem.existingReview) {
         const reviewId = productItem.existingReview.review_id || productItem.existingReview.id
-        console.log('✏️ Bắt đầu sửa đánh giá:', {
+        console.log('Bắt đầu sửa đánh giá:', {
             review_id: reviewId,
             existingReview: productItem.existingReview
         })
@@ -365,7 +357,7 @@ const handleEditReview = (productItem) => {
         // Set hasReview = false để hiển thị form edit
         productItem.hasReview = false
 
-        console.log('✅ Đã chuẩn bị sửa đánh giá:', {
+        console.log(' Đã chuẩn bị sửa đánh giá:', {
             review_id: reviewId,
             editingReviewId: productItem.editingReviewId,
             isEditing: productItem.isEditing,
@@ -374,7 +366,7 @@ const handleEditReview = (productItem) => {
             comment: productItem.comment
         })
     } else {
-        console.warn('⚠️ Không tìm thấy existingReview để sửa')
+        console.warn(' Không tìm thấy existingReview để sửa')
     }
 }
 

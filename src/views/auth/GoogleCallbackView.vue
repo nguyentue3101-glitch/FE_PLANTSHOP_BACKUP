@@ -62,14 +62,13 @@ onMounted(async () => {
       console.log('Google login successful, response:', response.data)
       
       const role = authStore.userRole
-      const returnUrl = sessionStorage.getItem('returnUrl') || '/'
-      sessionStorage.removeItem('returnUrl')
+ 
 
       // Redirect theo role
       if (role === 'ADMIN') {
         router.push('/dashboard')
       } else {
-        router.push(returnUrl)
+        router.push('/')
       }
     },
     {

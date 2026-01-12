@@ -1,8 +1,7 @@
 <template>
     <div class="flex items-center gap-1">
         <button v-for="star in 5" :key="star" type="button" @click="handleStarClick(star)"
-            @mouseenter="hoveredStar = star" @mouseleave="hoveredStar = 0"
-            class="transition-colors cursor-pointer focus:outline-none" :disabled="disabled">
+            class="transition-colors cursor-pointer " :disabled="disabled">
             <svg :class="[
                 'w-6 h-6 transition-colors',
                 star <= (hoveredStar || rating) ? 'text-yellow-400' : 'text-gray-300',

@@ -28,13 +28,12 @@ export const useCartStore = defineStore("cart", () => {
         cartItems.value = Array.isArray(data)
           ? data.map((item) => {
               const product = item.products
-             
               const cartItem = {
                 ...product,
-                product_id: product.product_id,
-                product_name: product.product_name,
-                price: product.price || 0,
-                img_url: product.img_url,
+                // product_id: product.product_id,
+                // product_name: product.product_name,
+                // price: product.price || 0,
+                // img_url: product.img_url,
                 quantity: item.quantity || 1, 
                 cart_detail_id: item.cart_detail_id,
                 selected: item.selected ?? true,
@@ -43,14 +42,14 @@ export const useCartStore = defineStore("cart", () => {
                 products: product, 
                 is_deleted: product._deleted,
               }
+
+              console.log("Loaded cart item:", cartItem)
               
       
               return cartItem
             })
           : []
-      } else {
-        cartItems.value = []
-      }
+      } 
     } catch (error) {
       cartItems.value = []
       throw error

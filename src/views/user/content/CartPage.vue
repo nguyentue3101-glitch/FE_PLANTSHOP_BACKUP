@@ -5,7 +5,7 @@
                 <div class="flex-1"></div>
                 <h1 class="text-3xl font-bold text-green-700 flex-1 text-center">Giỏ hàng của tôi</h1>
                 <div class="flex items-center gap-4 flex-1 justify-end">
-                    <router-link v-if="hasOrders" to="/orders-page"
+                    <router-link  to="/orders-page"
                         class="text-green-700 hover:text-green-500 font-semibold transition-colors">
                         Xem đơn hàng
                     </router-link>
@@ -52,7 +52,8 @@
 
                     ]">
                         <!-- Checkbox - Ẩn khi sản phẩm hết hàng hoặc ngưng kinh doanh -->
-                        <div v-if="!isOutOfStock(item) && !isDeleted(item) && !notEnoughStock(item)" class="flex items-start">
+                        <div v-if="!isOutOfStock(item) && !isDeleted(item) && !notEnoughStock(item)"
+                            class="flex items-start">
                             <input type="checkbox" :checked="isItemSelected(item)" @change="toggleItemSelection(item)"
                                 class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-1 cursor-pointer">
                         </div>
@@ -179,16 +180,12 @@
                             Tiếp tục mua sắm
                         </button>
 
-                        <!-- Debug info -->
-                        <div v-if="false" class="text-xs text-gray-500 mb-2">
-                            Debug: hasOrders = {{ hasOrders }}, debugHasOrders = {{ debugHasOrders }}
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal thông báo -->
+        <!-- Modal thông báo khi chưa chọn sp thanh toán -->
         <div v-if="showNotificationModal" class="fixed inset-0 flex items-center justify-center  z-50"
             @click="closeNotificationModal">
             <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4" @click.stop>
@@ -214,7 +211,7 @@
 
         <!-- Modal thông báo số lượng không đủ -->
         <NotificationModal :show-modal="showStockModal" mode="info" title="Số lượng không đủ"
-            :message="stockModalMessage" @close="handleCloseStockModal" @update:show-modal="showStockModal = $event" />
+            :message1="stockModalMessage" @close="handleCloseStockModal" @update:show-modal="showStockModal = $event" />
     </div>
 </template>
 
@@ -222,7 +219,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-import { useOrderStore } from '@/stores/orders'
+// import { useOrderStore } from '@/stores/orders'
 import { useRouter } from 'vue-router'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
 import QuantitySelector from '@/components/common/user/QuantitySelector.vue'
@@ -232,12 +229,12 @@ import { History, X, Trash2 } from 'lucide-vue-next'
 const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
-const orderStore = useOrderStore()
+// const orderStore = useOrderStore()
 const { executeAsync } = useAsyncOperation()
 
 // Quản lý trạng thái selected của các items
+//Set lưu các cart_detail_id của các items đã được chọn
 const selectedItems = ref(new Set())
-const hasOrders = ref(false)
 
 // Modal thông báo
 const showNotificationModal = ref(false)
@@ -265,20 +262,7 @@ const stockModalMessage = computed(() => {
     return `Số lượng sản phẩm "${currentProductName.value}" trong kho không đủ. Số lượng tối đa có thể mua là ${currentMaxQuantity.value} sản phẩm.`
 })
 
-// Debug computed để kiểm tra
-const debugHasOrders = computed(() => {
-    console.log('Computed hasOrders:', hasOrders.value)
-    return hasOrders.value
-})
 
-// Watch orderStore.orders để tự động cập nhật hasOrders
-watch(() => orderStore.orders, (newOrders) => {
-    console.log('OrderStore.orders changed:', newOrders)
-    if (newOrders && Array.isArray(newOrders)) {
-        hasOrders.value = newOrders.length > 0
-        console.log('hasOrders updated from watch:', hasOrders.value)
-    }
-}, { immediate: true, deep: true })
 
 const getUserId = () => {
     return authStore.userId
@@ -291,7 +275,7 @@ const getUserId = () => {
 const selectedCount = computed(() => {
     return cartStore.cartItems
         .filter(item => {
-            const identifier = item.cart_detail_id 
+            const identifier = item.cart_detail_id
             return selectedItems.value.has(identifier) && !isOutOfStock(item) && !isDeleted(item)
         }).length
 })
@@ -305,7 +289,7 @@ const selectableItemsCount = computed(() => {
 const selectedTotalItems = computed(() => {
     return cartStore.cartItems
         .filter(item => {
-            const identifier = item.cart_detail_id 
+            const identifier = item.cart_detail_id
             return selectedItems.value.has(identifier)
         })
         .reduce((sum, item) => sum + item.quantity, 0)
@@ -326,6 +310,7 @@ const isAllSelected = computed(() => {
 
 const toggleSelectAll = async (event) => {
     const userId = getUserId()
+    //user tick all thì event.target.checked = true
     //thuộc tính boolean của checkbox
     const shouldSelect = event.target.checked
 
@@ -382,7 +367,6 @@ const toggleSelectAll = async (event) => {
 
 //===================================check 1 item===================================
 const toggleItemSelection = async (item) => {
-    // Không cho phép chọn sản phẩm hết hàng
     if (isOutOfStock(item)) {
         showNotification('Không thể chọn sản phẩm hết hàng!')
         return
@@ -554,7 +538,7 @@ const handleDeleteConfirm = async () => {
         selectedItems.value.delete(identifier)
 
         // Hiển thị modal thành công
-        deleteModalMode.value = 'success'
+        deleteModalMode.value = 'delete-success'
     } catch (error) {
         console.error(error)
         // Đóng modal nếu có lỗi
@@ -605,27 +589,49 @@ const handleImageError = (event) => {
     }
 }
 
-//===================================reset selected items===================================
-// Reset selected items khi cart thay đổi
-const resetSelectedItems = () => {
-    selectedItems.value.clear()
-    cartStore.cartItems.forEach(item => {
-        const identifier = item.cart_detail_id
-        if (item.selected !== undefined && item.selected !== null) {
-            if (item.selected) {
-                selectedItems.value.add(identifier)
-            }
-        } else {
-            selectedItems.value.add(identifier)
-        }
-    })
-}
 
-// Watch cartItems để tự động cập nhật selected items khi cart thay đổi
-watch(() => cartStore.cartItems, (newItems, oldItems) => {
+// Kiểm tra xem user có đơn hàng không
+// const checkUserOrders = async () => {
+//     const userId = getUserId()
+//     if (!userId) {
+//         hasOrders.value = false
+//         return
+//     }
+//     try {
+//         const response = await orderStore.getOrdersByUserIdStore(userId)
+//         // Kiểm tra cả response và store
+//         let ordersList = null
+//         if (response?.data?.success && response.data.data) {
+//             ordersList = response.data.data
+//             console.log('Using response.data.data:', ordersList)
+//         } 
+//         if (ordersList ) {
+//             hasOrders.value = ordersList.length > 0
+//             console.log('hasOrders set to:', hasOrders.value)
+//         }
+//     } catch (error) {
+//         console.error('Error checking orders:', error)
+//         hasOrders.value = false
+//     }
+// }
+
+//===================================khởi tạo ===================================
+onMounted(async () => {
+    const userId = getUserId()
+    if (userId) {
+        await executeAsync(async () => {
+            await cartStore.loadCartFromBackend(userId)
+        }, {
+            defaultErrorMessage: 'Không thể tải giỏ hàng từ server!'
+        })
+    }
+})
+
+// hàm đồng bộ selected items từ db 
+watch(() => cartStore.cartItems, (newItems) => {
     // Đồng bộ selected items với selected state từ backend
     newItems.forEach(item => {
-        const identifier = item.cart_detail_id || item.product_id || item.id
+        const identifier = item.cart_detail_id 
         if (item.selected !== undefined && item.selected !== null) {
 
             if (item.selected) {
@@ -633,15 +639,16 @@ watch(() => cartStore.cartItems, (newItems, oldItems) => {
             } else {
                 selectedItems.value.delete(identifier)
             }
-        } else {
-            const isNewItem = !oldItems || !oldItems.some(oldItem => {
-                const oldIdentifier = oldItem.cart_detail_id || oldItem.product_id || oldItem.id
-                return oldIdentifier === identifier
-            })
-            if (isNewItem) {
-                selectedItems.value.add(identifier)
-            }
         }
+        // } else {
+        //     const isNewItem = !oldItems || !oldItems.some(oldItem => {
+        //         const oldIdentifier = oldItem.cart_detail_id 
+        //         return oldIdentifier === identifier
+        //     })
+        //     if (isNewItem) {
+        //         selectedItems.value.add(identifier)
+        //     }
+        // }
     })
 
     // Xóa các selected items không còn trong cart nữa
@@ -654,71 +661,8 @@ watch(() => cartStore.cartItems, (newItems, oldItems) => {
             selectedItems.value.delete(identifier)
         }
     })
-}, { deep: true })
-
-
-// Kiểm tra xem user có đơn hàng không
-const checkUserOrders = async () => {
-    const userId = getUserId()
-    if (!userId) {
-        hasOrders.value = false
-        return
-    }
-
-    try {
-        const response = await orderStore.getOrdersByUserIdStore(userId)
-
-        console.log('=== DEBUG CHECK ORDERS ===')
-        console.log('Response:', response)
-        console.log('Response.data:', response?.data)
-        console.log('Response.data.success:', response?.data?.success)
-        console.log('Response.data.data:', response?.data?.data)
-        console.log('OrderStore.orders:', orderStore.orders)
-
-        // Kiểm tra cả response và store
-        let ordersList = null
-        if (response?.data?.success && response.data.data) {
-            ordersList = response.data.data
-            console.log('Using response.data.data:', ordersList)
-        } else if (orderStore.orders && Array.isArray(orderStore.orders)) {
-            ordersList = orderStore.orders
-            console.log('Using orderStore.orders:', ordersList)
-        }
-
-        console.log('ordersList:', ordersList)
-        console.log('Is array?', Array.isArray(ordersList))
-        console.log('Length:', ordersList?.length)
-
-        if (ordersList && Array.isArray(ordersList)) {
-            hasOrders.value = ordersList.length > 0
-            console.log('hasOrders set to:', hasOrders.value)
-        } else {
-            hasOrders.value = false
-            console.log('hasOrders set to false - ordersList is not valid array')
-        }
-
-        console.log('Final hasOrders:', hasOrders.value)
-        console.log('=== END DEBUG ===')
-    } catch (error) {
-        console.error('Error checking orders:', error)
-        hasOrders.value = false
-    }
-}
-
-//===================================khởi tạo gọi api===================================
-onMounted(async () => {
-    const userId = getUserId()
-    if (userId) {
-        await executeAsync(async () => {
-            await cartStore.loadCartFromBackend(userId)
-            resetSelectedItems()
-            // Kiểm tra đơn hàng
-            await checkUserOrders()
-        }, {
-            defaultErrorMessage: 'Không thể tải giỏ hàng từ server!'
-        })
-    }
-})
+}, { immediate: true, deep: true })
+// ====================================Thông báo===================================
 
 const showNotification = (message) => {
     notificationMessage.value = message
@@ -741,21 +685,15 @@ const handleCheckout = () => {
     router.push({
         path: '/checkout',
         query: {
-            // Pass selected items info với đầy đủ thông tin sản phẩm
             selectedItems: JSON.stringify(
                 cartStore.cartItems
                     .filter(item => {
-                        const identifier = item.cart_detail_id 
+                        const identifier = item.cart_detail_id
                         return selectedItems.value.has(identifier)
                     })
                     .map(item => ({
                         cart_detail_id: item.cart_detail_id,
-                        product_id: item.product_id,
-                        product_name: item.product_name,
-                        img_url: item.img_url,
-                        quantity: item.quantity,
-                        price: item.price,
-                        stock: item.stock
+                        product_id: item.product_id
                     }))
             )
         }

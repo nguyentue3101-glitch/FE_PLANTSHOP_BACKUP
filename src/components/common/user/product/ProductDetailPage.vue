@@ -149,7 +149,7 @@
                         <div class="flex flex-col md:flex-row gap-8">
                             <!-- Average Rating -->
                             <div class="text-center md:text-left">
-                                <div class="text-4xl font-bold text-gray-800 text-center">{{ averageRating }}</div>
+                                <div class="text-4xl font-bold text-gray-800 text-center">{{Math.round(averageRating) }}</div>
                                 <div class="flex items-center justify-center md:justify-start gap-1 mt-2">
                                     <template v-for="star in 5" :key="star">
                                         <span :class="[
@@ -236,12 +236,12 @@
 
         <!-- Modal thông báo số lượng không đủ -->
         <NotificationModal :show-modal="showStockModal" mode="info" title="Số lượng không đủ"
-            :message="`Số lượng sản phẩm trong kho không đủ. Số lượng tối đa có thể mua là ${product ? (product.quantity || 0) : 0} sản phẩm.`"
+            :message1="`Số lượng sản phẩm trong kho không đủ. Số lượng tối đa có thể mua là ${product ? (product.quantity || 0) : 0} sản phẩm.`"
             @close="handleCloseStockModal" @update:show-modal="showStockModal = $event" />
 
         <!-- Modal thông báo đã đạt số lượng tối đa trong kho -->
         <NotificationModal :show-modal="showMaxQuantityModal" mode="info" title="Thông báo"
-            message="Hiện tại sản phẩm này trong giỏ hàng của bạn đã đạt số lượng tối đa trong kho!"
+            message1="Hiện tại sản phẩm này trong giỏ hàng của bạn đã đạt số lượng tối đa trong kho!"
             @close="handleCloseMaxQuantityModal" @update:show-modal="showMaxQuantityModal = $event" />
 
         <!-- Modal yêu cầu đăng nhập -->
@@ -258,7 +258,7 @@ import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useReviewStore } from '@/stores/reviews'
 import { useAsyncOperation } from '@/composables/useAsyncOperation'
-import { useCartAnimation } from '@/composables/useCartAnimation'
+// import { useCartAnimation } from '@/composables/useCartAnimation'
 import { useCartValidation } from '@/composables/useCartValidation'
 import { useLoginModal } from '@/composables/useLoginModal'
 import { getProductById } from '@/api/products/get'
@@ -274,7 +274,7 @@ const cartStore = useCartStore()
 const authStore = useAuthStore()
 const reviewStore = useReviewStore()
 const { isLoading, errorMessage, executeAsync } = useAsyncOperation()
-const { createFlyAnimation } = useCartAnimation()
+// const { createFlyAnimation } = useCartAnimation()
 const { validateCartQuantity } = useCartValidation()
 const { showLoginModal, openLoginModal, closeLoginModal, confirmLogin } = useLoginModal()
 
@@ -306,7 +306,7 @@ const canAddToCart = computed(() => {
     if (quantity.value <= 0 || quantity.value > product.value.quantity) return false
     return true
 })
-const handleAddToCart = async (event) => {
+const handleAddToCart = async () => {
     if (!canAddToCart.value) return
 
     try {
@@ -333,17 +333,17 @@ const handleAddToCart = async (event) => {
         }
 
         // Tạo animation trước khi thêm vào giỏ hàng
-        if (event) {
-            // Tìm hình ảnh sản phẩm trong trang detail
-            const productImage = document.querySelector('.product-detail-image img') ||
-                document.querySelector('.bg-gray-100 img') ||
-                document.querySelector('img[alt*="' + getProductName(product.value) + '"]')
-            if (productImage) {
-                createFlyAnimation(event, productImage)
-            } else {
-                createFlyAnimation(event)
-            }
-        }
+        // if (event) {
+        //     // Tìm hình ảnh sản phẩm trong trang detail
+        //     const productImage = document.querySelector('.product-detail-image img') ||
+        //         document.querySelector('.bg-gray-100 img') ||
+        //         document.querySelector('img[alt*="' + getProductName(product.value) + '"]')
+        //     // if (productImage) {
+        //     //     createFlyAnimation(event, productImage)
+        //     // } else {
+        //     //     createFlyAnimation(event)
+        //     // }
+        // }
 
         await cartStore.addToCart(product.value, quantity.value)
 
@@ -418,14 +418,11 @@ const handleCheckout = () => {
         return
     }
 
-    // Chuẩn bị thông tin sản phẩm đã chọn để truyền đến CheckInfoPage
+    // Chỉ gửi product_id và quantity để tránh user hack price
+    // Backend sẽ tự lấy giá từ database dựa trên product_id
     const selectedItem = {
         product_id: product.value.product_id || product.value.id,
-        product_name: getProductName(product.value),
-        img_url: getProductImage(product.value),
-        price: product.value.price,
-        quantity: quantity.value,
-        stock: product.value.quantity
+        quantity: quantity.value
     }
 
     // Điều hướng trực tiếp đến CheckInfoPage với thông tin sản phẩm (không thêm vào giỏ hàng)

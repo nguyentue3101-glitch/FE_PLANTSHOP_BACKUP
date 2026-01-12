@@ -122,6 +122,7 @@
         </div>
 
 
+        <!-- tìm kiếm -->
         <div class="flex-1 max-w-md mx-8">
           <SearchCommon v-model="searchQuery" mode="user" :show-category-filter="false" :show-suggestions="true" />
         </div>

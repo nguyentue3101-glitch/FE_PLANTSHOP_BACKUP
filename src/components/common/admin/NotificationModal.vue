@@ -40,7 +40,7 @@
                                 <component :is="iconComponent" :size="48" :class="iconClass" />
                             </div>
                         </div>
-                        <p class="text-center text-gray-700">{{ message || defaultMessage }}</p>
+                        <p class="text-center text-gray-700">{{message1|| defaultMessage }}</p>
                     </div>
                     <div class="flex justify-end">
                         <button @click="handleClose" :class="buttonClass"
@@ -83,6 +83,10 @@ const props = defineProps({
         default: ''
     },
     message: {
+        type: String,
+        default: ''
+    },
+    message1: {
         type: String,
         default: ''
     }
@@ -132,6 +136,7 @@ const defaultMessage = computed(() => {
         case 'update-success':
             return 'Đã cập nhật thành công!'
         case 'delete-success':
+            return 'Đã xóa thành công!'
         case 'success':
             return 'Thao tác đã được thực hiện thành công.'
         case 'restore-success':
