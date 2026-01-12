@@ -25,8 +25,8 @@ export const useProductStore = defineStore("product", () => {
   const getProducts = async () => {
     try {
       const response = await getAllProducts()
-      if (response.data.success) {
-        products.value = response.data.data
+      if (response.success) {
+        products.value = response.data
       }
     } catch (error) {
       console.error(error)
@@ -36,8 +36,8 @@ export const useProductStore = defineStore("product", () => {
   const getAllProductsDeleted = async (token) => {
     try {
       const response = await getAllProductDeleted(token)
-      if (response.data.success) {
-        allProductDeleted.value = response.data.data
+      if (response.success) {
+        allProductDeleted.value = response.data
       }
     } catch (error) {
       console.error('Error fetching deleted products:', error)
@@ -51,8 +51,8 @@ export const useProductStore = defineStore("product", () => {
   const getProductsByCategory = async (categoryId) => {
     try {
       const response = await getProductByCategory(categoryId)
-      if (response.data.success) {
-        productByCategory.value = response.data.data
+      if (response.success) {
+        productByCategory.value = response.data
       }
     } catch (error) {
       console.error(error)
@@ -63,8 +63,8 @@ export const useProductStore = defineStore("product", () => {
   const getProductByIdDeletedStore = async (productId) => {
     try {
       const response = await getProductByIdDeleted(productId)
-      if (response.data.success) {
-        return response.data.data
+      if (response.success) {
+        return response.data
       }
     } catch (error) {
       console.error(error)
@@ -74,8 +74,8 @@ export const useProductStore = defineStore("product", () => {
   const getProduct = async (productId) => {
     try {
       const response = await getProductById(productId)
-      if (response.data.success) {
-        return response.data.data
+      if (response.success) {
+        return response.data
       }
     } catch (error) {
       console.error(error)
@@ -84,7 +84,7 @@ export const useProductStore = defineStore("product", () => {
   const addProducts = async (token, productData) => {
     try {
       const response = await addProductsAPI(token, productData)
-      if (response.data.success) {
+      if (response.success) {
         products.value = { ...products.value }
       }
     } catch (error) {
@@ -114,7 +114,7 @@ export const useProductStore = defineStore("product", () => {
   const updateProductStore = async (token, productId, productData) => {
     try {
       const response = await updateProduct(token, productId, productData)
-      if (response.data.success) {
+      if (response.success) {
         products.value = { ...products.value }
       }
       return response
@@ -128,8 +128,8 @@ export const useProductStore = defineStore("product", () => {
   const getCategories = async () => {
     try {
       const response = await getAllCategories()
-      if (response.data.success) {
-        categories.value = response.data.data
+      if (response.success) {
+        categories.value = response.data
       }
     } catch (error) {
       console.error(error)
@@ -140,8 +140,8 @@ export const useProductStore = defineStore("product", () => {
   const getAllCategoriesDeleted = async (token) => {
     try {
       const response = await getAllCategoryDeleted(token)
-      if (response.data.success) {
-        allCategoryDeleted.value = response.data.data
+      if (response.success) {
+        allCategoryDeleted.value = response.data
       }
     } catch (error) {
       console.error('Error fetching deleted categories:', error)
@@ -156,7 +156,7 @@ export const useProductStore = defineStore("product", () => {
   const addCategories = async (token, categoryData) => {
     try {
       const response = await addCategoriesAPI(token, categoryData)
-      if (response.data.success) {
+      if (response.success) {
         categories.value = { ...categories.value }
       }
     } catch (error) {
@@ -190,7 +190,7 @@ export const useProductStore = defineStore("product", () => {
   const updateCategoryStore = async (token, categoryId, categoryData) => {
     try {
       const response = await updateCategory(token, categoryId, categoryData)
-      if (response.data.success) {
+      if (response.success) {
         categories.value = { ...categories.value }
       }
       return response
