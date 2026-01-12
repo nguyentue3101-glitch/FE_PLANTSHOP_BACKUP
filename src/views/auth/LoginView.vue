@@ -71,7 +71,7 @@ const handleGoogleLogin = async () => {
 
     // `${window.location.origin} => tự động lấy domain hiện tại
     //URI gg gửi code về BE để xử lý
-    const REDIRECT_URI = `${window.location.origin}/auth/google/callback`
+    const REDIRECT_URI = `https://fe-plantshop-backup.onrender.com/auth/google/callback`
     // const REDIRECT_URI = router.push('/auth/google/callback')
 
     // Tạo URL cho Google OAuth với các tham số đúng format
