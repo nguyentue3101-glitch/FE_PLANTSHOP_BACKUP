@@ -1,4 +1,3 @@
-import axios from "axios"
 import apiClient from "../axios";
 
 
@@ -8,27 +7,27 @@ export const getAllProducts = async () => {
 }
 
 export const getProductByCategory = async (categoryId) => {
-  const response = await axios.get(`/api/category/get-product-by-category/${categoryId}`)
+  const response = await apiClient.get(`/api/category/get-product-by-category/${categoryId}`)
   return response
 }
 
 
 
 export const getProductById = async (productId) => {
-  const response = await axios.get(`/api/product/get-by-id/${productId}`)
+  const response = await apiClient.get(`/api/product/get-by-id/${productId}`)
   return response
 }
 
 export const getProductByIdDeleted = async (productId) => {
 
-  const response = await axios.get(`/api/product/get-product-by-id-deleted/${productId}`)
+  const response = await apiClient.get(`/api/product/get-product-by-id-deleted/${productId}`)
   return response
 }
 
 
 
 export const getAllProductDeleted = async(token) => {
-    const response = await axios.get("/api/product/getall-deleted",{
+    const response = await apiClient.get("/api/product/getall-deleted",{
         headers:{
             Authorization: `Bearer ${token}`,
         },
@@ -37,11 +36,11 @@ export const getAllProductDeleted = async(token) => {
 }
  //====================category=========================
 export const getAllCategories = async () => {
-  const response = await axios.get("/api/category/getall")
+  const response = await apiClient.get("/api/category/getall")
   return response
 }
 export const getAllCategoryDeleted = async(token) => {
-    const response = await axios.get("/api/category/getall-deleted",{
+    const response = await apiClient.get("/api/category/getall-deleted",{
         headers:{
             Authorization: `Bearer ${token}`,
         },
