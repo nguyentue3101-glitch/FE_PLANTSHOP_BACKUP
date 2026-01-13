@@ -1,0 +1,72 @@
+/* Mobile-only responsive rules for the project
+   - Keeps all desktop sizes/layouts untouched
+   - Adds styles used only when the viewport is small (phones)
+   - Target breakpoints: max-width: 640px and a smaller one at 420px
+
+   Notes:
+   - Prefer selectors that don't change desktop Tailwind classes
+   - Use modest reductions of padding, height and font-size to "scale down" components
+*/
+
+@media (max-width: 640px) {
+  /* Header - top info bar */
+  header > .bg-green-800 {
+    padding: 0.35rem 1rem !important;
+    font-size: 13px !important;
+  }
+
+  /* Main navigation - reduce height and paddings */
+  header .px-10 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  header .h-20 { height: 56px !important; }
+  header .p-4.h-20 { padding: 0.25rem !important; height: 56px !important; font-size: 16px !important; }
+
+  /* Logo area - scale down */
+  header .w-50 { width: 100px !important; }
+  header .h-15 { height: 40px !important; }
+  header img[src*="/img/logo.png"] { max-width: 110px; height: auto; display:block; }
+
+  /* Icons and badges */
+  header .w-10.h-10 { width: 32px !important; height: 32px !important; }
+  header .-top-2.-right-2 { top: -6px !important; right: -6px !important; width: 18px !important; height: 18px !important; font-size: 10px !important; }
+  .cart-icon-container span.absolute { top: -6px !important; right: -6px !important; width: 18px !important; height: 18px !important; font-size: 10px !important; }
+
+  /* Search - allow full width on small screens */
+  header .flex-1.max-w-md.mx-8 { max-width: none !important; margin-left: 0.5rem !important; margin-right: 0.5rem !important; }
+
+  /* Reduce spacing in header links/buttons while preserving layout */
+  header a.p-4, header button.p-4 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; font-size: 16px !important; }
+
+  /* Category dropdown to not overflow the screen */
+  header .absolute.top-full.left-0 { left: 0 !important; right: 0 !important; width: auto !important; box-sizing: border-box; margin-left: 0; margin-right: 0; }
+
+  /* Footer - reduce padding and make layout single column on phones */
+  footer > div.h-full { padding-left: 1rem !important; padding-right: 1rem !important; padding-top: 1rem !important; padding-bottom: 1rem !important; gap: 0.75rem !important; }
+  footer .grid { grid-template-columns: 1fr !important; }
+  footer h2, footer h3 { font-size: 16px !important; }
+  footer p, footer ul { font-size: 13px !important; }
+  footer img.w-10.h-10 { width: 36px !important; height: 36px !important; }
+
+  /* General typography scaling for small screens */
+  body, .text-xl { font-size: 15px !important; }
+  .text-sm { font-size: 13px !important; }
+
+  /* Ensure containers fit the screen and don't overflow */
+  .navbar, .header, .footer, .container { box-sizing: border-box; width: 100%; padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+
+  /* Forms and search inputs should use full width on phones */
+  input, select, textarea, .search-input { width: 100% !important; max-width: 100% !important; }
+
+  /* Modals should not exceed screen width */
+  .modal, .modal * { max-width: 100% !important; }
+}
+
+/* Extra adjustments for very small devices */
+@media (max-width: 420px) {
+  header .w-50 { width: 90px !important; }
+  header .h-15 { height: 36px !important; }
+  header .p-4.h-20 { font-size: 14px !important; }
+  footer p, footer ul { font-size: 12px !important; }
+}
