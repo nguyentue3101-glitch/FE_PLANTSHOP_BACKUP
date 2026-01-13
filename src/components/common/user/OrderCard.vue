@@ -468,9 +468,9 @@ const loadPaymentInfo = async () => {
     // Chỉ load từ API nếu order không có payment info
     try {
         const paymentResponse = await paymentStore.getPaymentByOrderIdStore(props.order.order_id)
-        if (paymentResponse?.data?.success && paymentResponse?.data?.data) {
+        if (paymentResponse?.success && paymentResponse?.data) {
             // Xử lý cả trường hợp array và object
-            const data = paymentResponse.data.data
+            const data = paymentResponse.data
             if (data.length > 0) {
                 paymentInfo.value = data[0]
 
