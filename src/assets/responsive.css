@@ -1,0 +1,110 @@
+/* ============================================
+   RESPONSIVE CSS - MOBILE ONLY
+   Giữ nguyên layout desktop, chỉ scale down cho mobile
+   ============================================ */
+
+/* Mobile devices (max-width: 768px) */
+@media only screen and (max-width: 768px) {
+  /* Scale down toàn bộ app container */
+  #app {
+    transform: scale(0.5);
+    transform-origin: top left;
+    width: 200%;
+    min-height: 200vh;
+  }
+
+  /* Đảm bảo body và html không bị ảnh hưởng */
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* Fix cho header - giữ nguyên layout */
+  header {
+    transform-origin: top left;
+  }
+
+  /* Fix cho footer - giữ nguyên layout */
+  footer {
+    transform-origin: top left;
+  }
+
+  /* Đảm bảo các modal và dropdown vẫn hiển thị đúng kích thước */
+  /* Modal và dropdown sẽ được scale riêng để dễ tương tác */
+  [class*="modal"],
+  [class*="Modal"],
+  .absolute[class*="Menu"],
+  .fixed[class*="Menu"] {
+    transform: scale(2) !important;
+    transform-origin: center !important;
+    z-index: 9999 !important;
+  }
+
+  /* Fix cho các element có position fixed/absolute trong header */
+  header .sticky,
+  header .fixed,
+  header .absolute {
+    transform-origin: top left;
+  }
+
+  /* Đảm bảo images không bị vỡ */
+  img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Fix scroll behavior cho mobile */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Đảm bảo các button và link vẫn có thể click được */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+/* Tablet devices (768px - 1024px) - scale nhẹ hơn */
+@media only screen and (min-width: 769px) and (max-width: 1024px) {
+  #app {
+    transform: scale(0.75);
+    transform-origin: top left;
+    width: 133.33%;
+    min-height: 133.33vh;
+  }
+
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  [class*="modal"],
+  [class*="Modal"],
+  .absolute[class*="Menu"],
+  .fixed[class*="Menu"] {
+    transform: scale(1.33) !important;
+    transform-origin: center !important;
+  }
+}
+
+/* Desktop - giữ nguyên (không scale) */
+@media only screen and (min-width: 1025px) {
+  #app {
+    transform: none;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  [class*="modal"],
+  [class*="Modal"],
+  .absolute[class*="Menu"],
+  .fixed[class*="Menu"] {
+    transform: none !important;
+  }
+}
