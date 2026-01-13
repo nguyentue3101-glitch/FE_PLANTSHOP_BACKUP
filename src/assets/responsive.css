@@ -98,6 +98,21 @@
     padding-bottom: 0 !important;
   }
 
+  /* Fix khoảng trắng dưới footer - set height cho body dựa trên content */
+  body {
+    position: relative;
+  }
+
+  /* Bỏ tất cả khoảng trắng sau footer */
+  footer ~ * {
+    display: none !important;
+  }
+
+  /* Đảm bảo UserLayout không có height thừa */
+  .flex.flex-col.min-h-screen > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
   /* Đảm bảo các modal và dropdown vẫn hiển thị đúng kích thước */
   /* Modal và dropdown sẽ được scale riêng để dễ tương tác */
   [class*="modal"],
@@ -181,6 +196,90 @@
   section .flex-shrink-0 img {
     max-width: 80%;
     max-height: 80%;
+  }
+
+  /* ========== FIX CHO TRANG SẢN PHẨM ========== */
+  /* Đảm bảo DataPager (bộ lọc) vẫn hiển thị */
+  .container.mx-auto.px-4,
+  .container.mx-30 {
+    overflow: visible !important;
+    max-width: 100% !important;
+  }
+
+  /* Đảm bảo bộ lọc không bị ẩn - dùng selector tổng quát hơn */
+  div[class*="flex"][class*="flex-col"],
+  div[class*="flex"][class*="gap-4"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Scale bộ lọc để dễ tương tác */
+  .container select,
+  .container .flex.flex-col select {
+    transform: scale(2) !important;
+    transform-origin: top left !important;
+    margin-bottom: 0.5rem !important;
+    width: 50% !important;
+  }
+
+  /* Fix cho ProductList - hiển thị 3 items mỗi dòng, thu nhỏ lại */
+  .grid[class*="grid-cols"],
+  div[class*="grid"][class*="grid-cols"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Thu nhỏ product cards */
+  .product-card,
+  .grid > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Thu nhỏ hình ảnh sản phẩm */
+  .product-card img,
+  .grid img,
+  .grid .product-card img {
+    max-width: 100% !important;
+    max-height: 120px !important;
+    object-fit: contain !important;
+  }
+
+  /* Thu nhỏ container hình ảnh */
+  .product-card .relative.h-64,
+  .grid .relative[class*="h-"] {
+    height: 80px !important;
+    min-height: 80px !important;
+  }
+
+  /* Thu nhỏ text trong product cards */
+  .product-card h3 {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .product-card p {
+    font-size: 0.625rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .product-card .text-xl {
+    font-size: 0.875rem !important;
+  }
+
+  /* Thu nhỏ banner trên trang sản phẩm */
+  section.relative.h-\\[200px\\] {
+    height: 100px !important;
+  }
+
+  section.relative.h-\\[200px\\] h1 {
+    font-size: 1.5rem !important;
   }
 }
 
