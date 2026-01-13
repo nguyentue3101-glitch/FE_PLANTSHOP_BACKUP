@@ -248,14 +248,14 @@ const handleCancelOrder = async () => {
         // Hủy đơn hàng (cập nhật status thành CANCELLED)
         const response = await orderStore.cancelOrderStore(orderId)
 
-        if (response.data.success) {
+        if (response.success) {
             // Cập nhật payment status thành FAILED 
             try {
                 // Thử lấy payment từ order_id
                 try {
                     const paymentResponse = await paymentStore.getPaymentByOrderIdStore(orderId)
-                    if (paymentResponse.data.success && paymentResponse.data.data) {
-                        const payment = paymentResponse.data.data
+                    if (paymentResponse.success && paymentResponse.data) {
+                        const payment = paymentResponse.data
                         console.log('===================payment lấy từ order_id:', payment)
 
                         //lấy payment_id
@@ -271,8 +271,8 @@ const handleCancelOrder = async () => {
                     console.warn('ko lấy được đơn bằng order_id:', error)
                     // Nếu API lấy payment theo order_id không tồn tại, thử lấy từ order object
                     const orderResponse = await orderStore.getOrderByIdStore(orderId)
-                    if (orderResponse.data.success && orderResponse.data.data) {
-                        const order = orderResponse.data.data
+                    if (orderResponse.success && orderResponse.data) {
+                        const order = orderResponse.data
                         const paymentId = order.payment_id 
                         console.log('===================payment lấy từ order_id:', paymentId)
 
@@ -290,11 +290,11 @@ const handleCancelOrder = async () => {
             await loadOrders()
             closeCancelModal()
         } else {
-            cancelError.value = response.data.message || 'Hủy đơn hàng thất bại!'
+            cancelError.value = response.message || 'Hủy đơn hàng thất bại!'
         }
     } catch (error) {
         console.error('Error canceling order:', error)
-        cancelError.value = error.response?.data?.message || 'Có lỗi xảy ra khi hủy đơn hàng!'
+        cancelError.value = error.response?.message || 'Có lỗi xảy ra khi hủy đơn hàng!'
     } finally {
         isCancelling.value = false
     }
