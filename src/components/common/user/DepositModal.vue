@@ -190,9 +190,9 @@ const handlePayment = async () => {
         // BƯỚC 2.Tạo đơn hàng
         const response = await orderStore.createNewOrder(props.orderData)
 
-        if (response.data.success) {
+        if (response.success) {
             // Lấy order data từ response
-            const orderDataFromResponse = response.data.data
+            const orderDataFromResponse = response.data
             const orderId = orderDataFromResponse?.order_id 
 
             if (!orderId) {
@@ -248,11 +248,11 @@ const handlePayment = async () => {
                 throw new Error('Không tìm thấy thông tin thanh toán đặt cọc')
             }
         } else {
-            throw new Error(response.data.message || 'Tạo đơn hàng thất bại!')
+            throw new Error(response.message || 'Tạo đơn hàng thất bại!')
         }
     } catch (error) {
         console.error('Error in handlePayment:', error)
-        alert(error.response?.data?.message || error.message || 'Không thể tạo đơn hàng. Vui lòng thử lại!')
+        alert(error.response?.message || error.message || 'Không thể tạo đơn hàng. Vui lòng thử lại!')
         isProcessing.value = false
     }
 }
