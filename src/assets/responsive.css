@@ -10,7 +10,7 @@
     transform: scale(0.5);
     transform-origin: top left;
     width: 200%;
-    min-height: 200vh;
+    /* Bỏ min-height cố định, để content tự quyết định */
   }
 
   /* Đảm bảo body và html không bị ảnh hưởng */
@@ -19,16 +19,60 @@
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+    /* Bỏ khoảng trắng thừa */
+    margin: 0;
+    padding: 0;
   }
 
-  /* Fix cho header - giữ nguyên layout */
+  /* Fix cho header - giữ nguyên layout và tránh overflow */
   header {
     transform-origin: top left;
+    max-width: 200%;
+    overflow-x: hidden;
+    position: relative;
   }
 
-  /* Fix cho footer - giữ nguyên layout */
+  /* Fix header bottom navigation - tránh giỏ hàng bị đẩy ra ngoài */
+  header > div:last-child {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  /* Fix cho phần navigation trong header */
+  header .flex.justify-between {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  header .flex.justify-between::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  /* Đảm bảo giỏ hàng không bị đẩy ra ngoài */
+  .cart-icon-container {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  /* Fix cho footer - giữ nguyên layout và bỏ khoảng trắng */
   footer {
     transform-origin: top left;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  /* Bỏ khoảng trắng sau footer */
+  footer::after {
+    content: none;
+  }
+
+  /* Fix khoảng trắng dưới footer - đảm bảo không có margin/padding thừa */
+  body > *:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   /* Đảm bảo các modal và dropdown vẫn hiển thị đúng kích thước */
@@ -67,6 +111,30 @@
   [role="button"] {
     touch-action: manipulation;
   }
+
+  /* Giảm kích thước items trên home page để phù hợp hơn */
+  /* Các product cards và category cards */
+  section[class*="px-10"] .flex-shrink-0 {
+    min-width: 0;
+  }
+
+  /* Điều chỉnh kích thước items trong section Danh Mục và Sản Phẩm Nổi Bật */
+  section .flex.transition-transform .flex-shrink-0 {
+    width: calc(50% - 0.75rem) !important;
+    min-width: calc(50% - 0.75rem) !important;
+    max-width: calc(50% - 0.75rem) !important;
+  }
+
+  /* Giảm padding và spacing cho items */
+  section .flex-shrink-0 .p-4 {
+    padding: 0.75rem;
+  }
+
+  /* Giảm kích thước hình ảnh trong items */
+  section .flex-shrink-0 img {
+    max-width: 80%;
+    max-height: 80%;
+  }
 }
 
 /* Tablet devices (768px - 1024px) - scale nhẹ hơn */
@@ -75,13 +143,24 @@
     transform: scale(0.75);
     transform-origin: top left;
     width: 133.33%;
-    min-height: 133.33vh;
   }
 
   html,
   body {
     width: 100%;
     overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    max-width: 133.33%;
+    overflow-x: hidden;
+  }
+
+  footer {
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   [class*="modal"],
@@ -98,7 +177,12 @@
   #app {
     transform: none;
     width: 100%;
-    min-height: 100vh;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
   }
 
   [class*="modal"],
