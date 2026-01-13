@@ -154,8 +154,8 @@ const loadProductRatings = async (products) => {
 
         try {
             const response = await reviewStore.getReviewsByProductIdStore(productId)
-            if (response?.data?.success && response.data.data) {
-                const reviews = response.data.data || []
+            if (response?.success && response.data) {
+                const reviews = response.data || []
                 if (reviews.length > 0) {
                     const total = reviews.reduce((sum, review) => sum + (review.rating || 0), 0)
                     const average = (total / reviews.length).toFixed(1) //giữ 1 số thập phân
