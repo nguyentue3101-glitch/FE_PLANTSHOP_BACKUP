@@ -470,8 +470,8 @@ const loadProductReviews = async (productId) => {
     isLoadingReviews.value = true
     try {
         const response = await reviewStore.getReviewsByProductIdStore(productId)
-        if (response?.success && response.data) {
-            productReviews.value = response.data || []
+        if (response?.success && response?.data) {
+            productReviews.value = response?.data || []
         } else {
             productReviews.value = []
         }
