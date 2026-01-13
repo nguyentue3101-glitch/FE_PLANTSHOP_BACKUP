@@ -213,6 +213,13 @@ const handleAddProduct = async (productData) => {
         formData.append('image', productData.imageFile)
     }
 
+    // Debug: log formData entries
+    try {
+        console.log('FormData entries for add product:', [...formData.entries()].map(([k,v]) => [k, v instanceof File ? v.name : v]))
+    } catch (e) {
+        console.warn('Could not log formData entries', e)
+    }
+
     await executeAddAsync(async () => {
         await productStore.addProducts(token, formData)
         await refreshProductsData(token)
@@ -280,6 +287,12 @@ const handleUpdateProduct = async (productData) => {
     formData.append('product', JSON.stringify(productObject))
     if (productData.imageFile) {
         formData.append('image', productData.imageFile)
+    }
+
+    try {
+        console.log('FormData entries for update product:', [...formData.entries()].map(([k,v]) => [k, v instanceof File ? v.name : v]))
+    } catch (e) {
+        console.warn('Could not log formData entries', e)
     }
 
     await executeUpdateAsync(async () => {
