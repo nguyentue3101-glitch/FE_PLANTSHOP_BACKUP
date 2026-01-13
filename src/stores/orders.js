@@ -184,9 +184,9 @@ export const useOrderStore = defineStore("order", () => {
     const updateOrderShippingStatusStore = async (orderId, shippingStatus) => {
         const token = authStore.accessToken
         try {
-            console.log('🔄 Updating shipping status:', { orderId, shippingStatus })
+            console.log(' Updating shipping status:', { orderId, shippingStatus })
             const response = await updateOrderShippingStatus(orderId, token, shippingStatus)
-            console.log('📦 Response from backend:', response.data)
+            console.log(' Response from backend:', response.data)
             if (response.success) {
                 // Reload orders list
                 await getAllOrdersStore()

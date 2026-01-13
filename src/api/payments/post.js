@@ -6,7 +6,7 @@ export const createMoMoPayment = async (orderId, amount, orderInfo = null) => {
         amount,
         orderInfo: orderInfo 
     }
-    return apiClient.post('/payments/momo/create', data)
+    return apiClient.post('/api/payments/momo/create', data)
 }
 
 
@@ -44,6 +44,6 @@ export const createMoMoPayment = async (orderId, amount, orderInfo = null) => {
 
 // Tạo payment record sau khi tạo đơn hàng
 export const createPayment = async (orderId, paymentData) => {
-    return apiClient.post(`/payments/create/${orderId}`, paymentData)
+    return apiClient.post(`/api/payments/create/${orderId}`, paymentData)
 }
 

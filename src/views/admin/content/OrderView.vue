@@ -274,7 +274,7 @@ const loadOrders = async () => {
     }, {
         defaultErrorMessage: 'Không thể tải danh sách đơn hàng!',
         onError: (error) => {
-            errorMessage.value = error.response?.data?.message || error.message
+            errorMessage.value = error.response?.message || error.message
         }
     })
 }

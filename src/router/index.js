@@ -16,7 +16,7 @@ import HomePage from "@/views/user/content/HomePage.vue"
 import ProductPage from "@/views/user/content/ProductPage.vue"
 import { Home, Package, Users, Folder, Percent, ShoppingCart, Star } from "lucide-vue-next"
 import { createRouter, createWebHistory } from "vue-router"
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from "@/stores/auth"
 import CartPage from "@/views/user/content/CartPage.vue"
 import GoogleCallbackView from "@/views/auth/GoogleCallbackView.vue"
 import UserInfoPage from "@/views/components/UserInfoPage.vue"
@@ -36,12 +36,12 @@ const router = createRouter({
     if (to.hash) {
       return {
         el: to.hash,
-        behavior: 'smooth'
+        behavior: "smooth",
       }
     }
     return {
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     }
   },
   routes: [
@@ -153,7 +153,7 @@ const router = createRouter({
         {
           path: "order-history",
           name: "order-history",
-          component:OrderHistoryPage,
+          component: OrderHistoryPage,
           meta: {
             isShow: false,
             title: "Lịch sử đơn hàng",
@@ -182,7 +182,7 @@ const router = createRouter({
         //     requiresAuth: false, // Không yêu cầu auth vì MoMo redirect về đây
         //     requiresUser: false,
         //   },
-      
+
         // },
       ],
     },
@@ -325,57 +325,60 @@ export default router
 
 router.beforeEach(async (to) => {
   document.title = to.meta?.title || to.name || "Plant Shop"
-  
+
   const authStore = useAuthStore()
 
   // Nếu access token đã tồn tại nhưng đã expired, cố gắng refresh trước khi quyết định redirect
   if (authStore.accessToken && authStore.isAccessTokenExpired && authStore.refreshToken) {
     try {
-      console.log('Router guard: access token expired, attempting refresh...')
+      console.log("Router guard: access token expired, attempting refresh...")
       await authStore.refreshAccessToken()
-      console.log('Router guard: refresh attempt finished. isAuthenticated=', authStore.isAuthenticated)
+      console.log(
+        "Router guard: refresh attempt finished. isAuthenticated=",
+        authStore.isAuthenticated
+      )
     } catch (err) {
-      console.error('Router guard: refresh token failed', err)
+      console.error("Router guard: refresh token failed", err)
       // Nếu refresh không thành công, authStore.refreshAccessToken sẽ clear token
     }
   }
-  
+
   // Chặn truy cập /login và /register nếu đã đăng nhập
-  if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register')) {
+  if (authStore.isAuthenticated && (to.path === "/login" || to.path === "/register")) {
     const role = authStore.userRole
-    if (role === 'ADMIN') {
-      return '/dashboard'
+    if (role === "ADMIN") {
+      return "/dashboard"
     } else {
-      return '/'
+      return "/"
     }
   }
 
   // Check nếu route yêu cầu authentication
   if (to.meta?.requiresAuth) {
     if (!authStore.isAuthenticated) {
-      return '/login'
+      return "/login"
     }
 
     // Check nếu route yêu cầu quyền ADMIN
     if (to.meta?.requiresAdmin) {
       const role = authStore.userRole
-      if (role !== 'ADMIN') {
-        alert('Bạn không có quyền truy cập trang này!')
-        return '/'
+      if (role !== "ADMIN") {
+        alert("Bạn không có quyền truy cập trang này!")
+        return "/"
       }
     }
 
     // Check nếu route yêu cầu quyền USER
     if (to.meta?.requiresUser) {
       const role = authStore.userRole
-      if (role !== 'USER') {
+      if (role !== "USER") {
         // Nếu là ADMIN thì redirect về dashboard
-        if (role === 'ADMIN') {
-          return '/dashboard'
+        if (role === "ADMIN") {
+          return "/dashboard"
         }
         // Không có quyền thì về login
-        alert('Bạn không có quyền truy cập trang này!')
-        return '/login'
+        alert("Bạn không có quyền truy cập trang này!")
+        return "/login"
       }
     }
   }
