@@ -253,7 +253,7 @@
     opacity: 1 !important;
   }
 
-  /* Bộ lọc hiển thị ngang như desktop (2 dropdown cạnh nhau) */
+  /* Bộ lọc hiển thị ngang như desktop (2 dropdown cạnh nhau) - FULL WIDTH */
   .container .flex.flex-col[class*="gap-4"],
   .container div[class*="flex"][class*="flex-col"][class*="gap-4"] {
     flex-direction: row !important;
@@ -261,11 +261,13 @@
     gap: 0.5rem !important;
     margin-top: 0.5rem !important;
     margin-bottom: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
     position: relative !important;
     z-index: 1 !important;
   }
 
-  /* Scale bộ lọc nhỏ lại - vừa phải để dễ tương tác */
+  /* Scale bộ lọc nhỏ lại - vừa phải để dễ tương tác - FULL WIDTH */
   .container select,
   .container .flex select,
   .container div[class*="flex"] select {
@@ -280,7 +282,7 @@
     z-index: 1 !important;
   }
 
-  /* Container của mỗi select trong bộ lọc */
+  /* Container của mỗi select trong bộ lọc - FULL WIDTH */
   .container .flex > div[class*="sm:w-48"],
   .container .flex.flex-col > div,
   .container div[class*="flex"] > div {
@@ -290,61 +292,69 @@
     flex: 0 0 calc(50% - 0.25rem) !important;
   }
 
-  /* Đảm bảo container bộ lọc có margin-top để không đè lên banner */
+  /* Đảm bảo container bộ lọc full width */
+  .container.mx-auto.px-4 > div:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Đảm bảo container bộ lọc có margin-top để không đè lên banner và full width */
   .container.mx-auto.px-4 > div:first-child {
     margin-top: 0.5rem !important;
     position: relative !important;
     z-index: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
-  /* Fix cho ProductList - hiển thị 3 items mỗi dòng, thu nhỏ lại */
+  /* Fix cho ProductList - hiển thị 2 items mỗi dòng giống trang chủ */
   .grid[class*="grid-cols"],
   div[class*="grid"][class*="grid-cols"] {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 0.5rem !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.75rem !important;
     width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
   }
 
-  /* Thu nhỏ product cards */
+  /* Thu nhỏ product cards - giống trang chủ */
   .product-card,
   .grid > div {
     max-width: 100% !important;
     width: 100% !important;
-    padding: 0.5rem !important;
+    padding: 0.75rem !important;
   }
 
-  /* Thu nhỏ hình ảnh sản phẩm */
+  /* Thu nhỏ hình ảnh sản phẩm - giống trang chủ */
   .product-card img,
   .grid img,
   .grid .product-card img {
     max-width: 100% !important;
-    max-height: 120px !important;
+    max-height: 150px !important;
     object-fit: contain !important;
   }
 
-  /* Thu nhỏ container hình ảnh */
+  /* Thu nhỏ container hình ảnh - giống trang chủ */
   .product-card .relative.h-64,
   .grid .relative[class*="h-"] {
-    height: 80px !important;
-    min-height: 80px !important;
+    height: 120px !important;
+    min-height: 120px !important;
   }
 
-  /* Thu nhỏ text trong product cards */
+  /* Thu nhỏ text trong product cards - giống trang chủ */
   .product-card h3 {
-    font-size: 0.75rem !important;
-    line-height: 1.2 !important;
-    margin-bottom: 0.25rem !important;
+    font-size: 0.875rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .product-card p {
-    font-size: 0.625rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
   }
 
   .product-card .text-xl {
-    font-size: 0.875rem !important;
+    font-size: 1rem !important;
   }
 
   /* Thu nhỏ banner trên trang sản phẩm */
