@@ -348,7 +348,7 @@ const handleAddToCart = async () => {
         await cartStore.addToCart(product.value, quantity.value)
 
     } catch (error) {
-        const errorMessage = error.message || error.originalError?.response?.data?.message || 'Đã có lỗi xảy ra'
+        const errorMessage = error.message || error.originalError?.response?.message || 'Đã có lỗi xảy ra'
         alert(`Lỗi khi thêm sản phẩm vào giỏ hàng: ${errorMessage}`)
     }
 }
@@ -470,8 +470,8 @@ const loadProductReviews = async (productId) => {
     isLoadingReviews.value = true
     try {
         const response = await reviewStore.getReviewsByProductIdStore(productId)
-        if (response?.data?.success && response.data.data) {
-            productReviews.value = response.data.data || []
+        if (response?.success && response.data) {
+            productReviews.value = response.data || []
         } else {
             productReviews.value = []
         }
