@@ -327,6 +327,18 @@ router.beforeEach(async (to) => {
   document.title = to.meta?.title || to.name || "Plant Shop"
   
   const authStore = useAuthStore()
+
+  // Nếu access token đã tồn tại nhưng đã expired, cố gắng refresh trước khi quyết định redirect
+  if (authStore.accessToken && authStore.isAccessTokenExpired && authStore.refreshToken) {
+    try {
+      console.log('Router guard: access token expired, attempting refresh...')
+      await authStore.refreshAccessToken()
+      console.log('Router guard: refresh attempt finished. isAuthenticated=', authStore.isAuthenticated)
+    } catch (err) {
+      console.error('Router guard: refresh token failed', err)
+      // Nếu refresh không thành công, authStore.refreshAccessToken sẽ clear token
+    }
+  }
   
   // Chặn truy cập /login và /register nếu đã đăng nhập
   if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register')) {

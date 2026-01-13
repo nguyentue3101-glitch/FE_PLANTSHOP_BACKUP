@@ -27,10 +27,10 @@
         <!-- Logged In - User Menu -->
         <div class="relative z-[100]">
           <!-- Nếu chưa login, hiển thị button login -->
-          <button v-if="getUsername() == 'Login'" @click="handleLogin"
+          <button v-if="!authStore.isAuthenticated" @click="handleLogin"
             class="cursor-pointer hover:opacity-80 flex items-center gap-2">
             <User class="w-5 h-5" />
-            <span>{{ getUsername() }}</span>
+            <span>Login</span>
           </button>
 
           <!-- Nếu đã login, hiển thị button user menu -->
@@ -40,7 +40,7 @@
           </button>
 
           <!-- Dropdown Menu (chỉ hiển thị khi đã login) -->
-          <div v-if="showUserMenu && getUsername() != 'Login'"
+          <div v-if="showUserMenu && authStore.isAuthenticated"
             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]"
             @click.stop>
             <button @click="handleViewProfile"
