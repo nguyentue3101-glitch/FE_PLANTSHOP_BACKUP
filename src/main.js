@@ -1,12 +1,11 @@
-import './assets/main.css'
+import "./assets/main.css"
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import axios from 'axios'
+import { createApp } from "vue"
+import { createPinia } from "pinia"
+import axios from "axios"
 
-import App from './App.vue'
-import router from './router'
-
+import App from "./App.vue"
+import router from "./router"
 
 // Axios interceptor để tự động thêm token
 axios.interceptors.request.use(
@@ -16,8 +15,8 @@ axios.interceptors.request.use(
     if (config._skipRetry || config._skipAuth) {
       return config
     }
-    
-    const token = localStorage.getItem('accessToken')
+
+    const token = localStorage.getItem("accessToken")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -45,7 +44,6 @@ const processQueue = (error, token = null) => {
   failedQueue = []
 }
 
-
 //hàm xử lý khi token hết hạn và tự động refresh token
 axios.interceptors.response.use(
   (response) => {
@@ -64,7 +62,10 @@ axios.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -80,69 +81,69 @@ axios.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken')
-        if (!refreshToken) throw new Error('No refresh token')
+        const refreshToken = localStorage.getItem("refreshToken")
+        if (!refreshToken) throw new Error("No refresh token")
 
         // Tạo config riêng cho refresh API để tránh infinite loop
         const refreshConfig = {
           headers: { Authorization: `Bearer ${refreshToken}` },
         }
         refreshConfig._skipRetry = true
-        const response = await axios.post('/api/auth/refresh', null, refreshConfig)
+        const response = await axios.post("/api/auth/refresh", null, refreshConfig)
 
         if (response.data.success) {
           const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data
-          localStorage.setItem('accessToken', newAccessToken)
-          localStorage.setItem('refreshToken', newRefreshToken)
-          
+          localStorage.setItem("accessToken", newAccessToken)
+          localStorage.setItem("refreshToken", newRefreshToken)
+
           // Update auth store nếu có
           try {
-            const { useAuthStore } = await import('./stores/auth')
+            const { useAuthStore } = await import("./stores/auth")
             const authStore = useAuthStore()
             // Cập nhật token trong store (ref cần dùng .value)
             authStore.accessToken.value = newAccessToken
             authStore.refreshToken.value = newRefreshToken
             // Cập nhật localStorage (đã được cập nhật ở trên, nhưng đảm bảo đồng bộ)
             authStore.saveTokens(newAccessToken, newRefreshToken)
-            
+
             // Reload user info sau khi refresh token thành công
             try {
-              const { useUserStore } = await import('./stores/user')
+              const { useUserStore } = await import("./stores/user")
               const userStore = useUserStore()
               // Chỉ reload nếu user đã đăng nhập và có userId
               if (authStore.isAuthenticated && authStore.userId) {
                 await userStore.getInfo(newAccessToken)
               }
             } catch (userErr) {
-              console.error('Error reloading user info after token refresh:', userErr)
+              console.error("Error reloading user info after token refresh:", userErr)
             }
           } catch (err) {
             console.error(err)
           }
-          
+
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
           processQueue(null, newAccessToken)
           return axios(originalRequest)
         } else {
-          throw new Error('Refresh token failed')
+          throw new Error("Refresh token failed")
         }
       } catch (err) {
         processQueue(err, null)
         try {
-          const { useAuthStore } = await import('./stores/auth')
+          const { useAuthStore } = await import("./stores/auth")
           const authStore = useAuthStore()
-          if (typeof authStore.logoutImmediate === 'function') {
+          if (typeof authStore.logoutImmediate === "function") {
             await authStore.logoutImmediate()
           } else {
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
-            window.location.href = '/login'
+            localStorage.removeItem("accessToken")
+            localStorage.removeItem("refreshToken")
+            window.location.href = "/login"
           }
         } catch (e) {
-          console.error('Error during logoutImmediate:', e)
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          window.location.href = '/login'
+          console.error("Error during logoutImmediate:", e)
+          localStorage.removeItem("accessToken")
+          localStorage.removeItem("refreshToken")
+          window.location.href = "/login"
         }
         return Promise.reject(err)
       } finally {
@@ -159,4 +160,4 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
-app.mount('#app')
+app.mount("#app")

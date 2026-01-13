@@ -691,6 +691,7 @@ const depositOrderData = computed(() => {
         shipping_name: finalShippingName,
         shipping_address: finalShippingAddress,
         shipping_phone: finalShippingPhone,
+        shipping_fee: shippingFee.value,
         payment: {
             method_id: paymentMethodId,
             amount: finalTotal.value,
