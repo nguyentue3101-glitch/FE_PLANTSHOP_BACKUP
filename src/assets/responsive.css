@@ -10,7 +10,7 @@
     transform: scale(0.5);
     transform-origin: top left;
     width: 200%;
-    height: 100px;
+    height: 1000px;
     /* Bỏ min-height cố định, để content tự quyết định */
   }
 
