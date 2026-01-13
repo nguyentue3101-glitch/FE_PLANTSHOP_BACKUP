@@ -797,8 +797,8 @@ const handleCreateOrder = async () => {
 
             const response = await orderStore.createNewOrder(orderData)
 
-            if (response.data.success) {
-                const orderData = response.data.data
+            if (response.success) {
+                const orderData = response.data
                 const orderId = orderData?.order_id 
 
                 if (!orderId) {
@@ -867,13 +867,13 @@ const handleCreateOrder = async () => {
                     })
                 }
             } else {
-                throw new Error(response.data.message || 'Tạo đơn hàng thất bại!')
+                throw new Error(response.message || 'Tạo đơn hàng thất bại!')
             }
         }, {
             defaultErrorMessage: 'Không thể tạo đơn hàng!',
             onError: (error) => {
                 console.error('Order creation error:', error)
-                errorMessage.value = error.response?.data?.message || error.message
+                errorMessage.value = error.response?.message || error.message
             }
         })
     } catch (error) {
