@@ -329,11 +329,11 @@ const loadDailyDataForMonth = async () => {
     promises.push(
       getStatisticsByDate(year, month, day)
         .then(response => {
-          if (response.data?.success && response.data?.data) {
+          if (response?.success && response?.data) {
             return {
               day,
-              revenue: response.data.data.totalRevenue || 0,
-              orders: response.data.data.totalOrders || 0
+              revenue: response.data.totalRevenue || 0,
+              orders: response.data.totalOrders || 0
             }
           }
           return { day, revenue: 0, orders: 0 }
@@ -352,8 +352,8 @@ const loadStatistics = async () => {
     if (viewType.value === 'month') {
       // lấy doanh thu theo tháng
       const statsResponse = await getStatisticsByMonth(selectedYear.value, selectedMonth.value)
-      if (statsResponse.data?.success && statsResponse.data?.data) {
-        statistics.value = statsResponse.data.data
+      if (statsResponse?.success && statsResponse?.data) {
+        statistics.value = statsResponse.data
       }
       // lấy tổng sản phẩm bán được theo tháng
       await statisticsStore.getTotalProductsSoldByMonthStore(selectedYear.value, selectedMonth.value)
@@ -363,8 +363,8 @@ const loadStatistics = async () => {
     } else {
       // lấy doanh thu theo năm
       const statsResponse = await getStatisticsByYear(selectedYear.value)
-      if (statsResponse.data?.success && statsResponse.data?.data) {
-        statistics.value = statsResponse.data.data
+      if (statsResponse?.success && statsResponse?.data) {
+        statistics.value = statsResponse.data
       }
 
       //  lấy tổng sản phẩm bán được theo năm
@@ -388,11 +388,11 @@ const loadMonthlyDataForYear = async () => {
     promises.push(
       getStatisticsByMonth(selectedYear.value, month)
         .then(response => {
-          if (response.data?.success && response.data?.data) {
+          if (response?.success && response?.data) {
             return {
               month,
-              revenue: response.data.data.totalRevenue || 0,
-              orders: response.data.data.totalOrders || 0
+              revenue: response.data.totalRevenue || 0,
+              orders: response.data.totalOrders || 0
             }
           }
           return { month, revenue: 0, orders: 0 }
@@ -526,8 +526,8 @@ const loadTotalUsers = async () => {
     }
 
     const response = await getAllUser(token)
-    if (response.data?.success) {
-      totalUsers.value = response.data.data.length
+    if (response?.success) {
+      totalUsers.value = response.data.length
     } else {
       totalUsers.value = 0
     }
