@@ -128,9 +128,22 @@ axios.interceptors.response.use(
         }
       } catch (err) {
         processQueue(err, null)
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        window.location.href = '/login'
+        try {
+          const { useAuthStore } = await import('./stores/auth')
+          const authStore = useAuthStore()
+          if (typeof authStore.logoutImmediate === 'function') {
+            await authStore.logoutImmediate()
+          } else {
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            window.location.href = '/login'
+          }
+        } catch (e) {
+          console.error('Error during logoutImmediate:', e)
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          window.location.href = '/login'
+        }
         return Promise.reject(err)
       } finally {
         isRefreshing = false

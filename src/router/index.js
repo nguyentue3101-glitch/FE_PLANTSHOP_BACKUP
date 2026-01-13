@@ -332,14 +332,33 @@ router.beforeEach(async (to) => {
   if (authStore.accessToken && authStore.isAccessTokenExpired && authStore.refreshToken) {
     try {
       console.log("Router guard: access token expired, attempting refresh...")
-      await authStore.refreshAccessToken()
+      const refreshed = await authStore.refreshAccessToken()
       console.log(
-        "Router guard: refresh attempt finished. isAuthenticated=",
+        "Router guard: refresh attempt finished. refreshed=",
+        refreshed,
+        "isAuthenticated=",
         authStore.isAuthenticated
       )
+      if (!refreshed) {
+        // Nếu không refresh được thì logout ngay lập tức và redirect về login
+        if (typeof authStore.logoutImmediate === 'function') {
+          await authStore.logoutImmediate()
+        } else {
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          return '/login'
+        }
+        return '/login'
+      }
     } catch (err) {
       console.error("Router guard: refresh token failed", err)
-      // Nếu refresh không thành công, authStore.refreshAccessToken sẽ clear token
+      if (typeof authStore.logoutImmediate === 'function') {
+        await authStore.logoutImmediate()
+      } else {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+      }
+      return '/login'
     }
   }
 

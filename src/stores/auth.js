@@ -46,10 +46,56 @@ export const useAuthStore = defineStore("auth", () => {
     refreshToken.value = null
   }
 
-  // check user login 
-  const isAuthenticated = computed(() => {
-    return !!accessToken.value //!!=> ép boolean
+  // Kiểm tra access token đã hết hạn hay chưa
+  const isAccessTokenExpired = computed(() => {
+    if (!accessToken.value) return true
+    try {
+      const decoded = decodeJWT(accessToken.value)
+      const exp = decoded?.exp
+      if (!exp) return true
+      return Date.now() >= exp * 1000
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      return true
+    }
   })
+
+  // check user login: token tồn tại và chưa expired
+  const isAuthenticated = computed(() => {
+    if (!accessToken.value) return false
+    return !isAccessTokenExpired.value
+  })
+
+  // Thử refresh access token bằng refresh token (trả về true nếu refresh thành công)
+  const refreshAccessToken = async () => {
+    if (!refreshToken.value) return false
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${refreshToken.value}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!resp.ok) {
+        clearTokens()
+        return false
+      }
+      const data = await resp.json()
+      const newAccess = data?.data?.accessToken || data?.accessToken || null
+      const newRefresh = data?.data?.refreshToken || data?.refreshToken || null
+      if (newAccess) {
+        saveTokens(newAccess, newRefresh)
+        return true
+      }
+      clearTokens()
+      return false
+    } catch (error) {
+      console.error('Refresh token error:', error)
+      clearTokens()
+      return false
+    }
+  }
 
   // lấy role từ JWT token
   const userRole = computed(() => {
@@ -123,6 +169,39 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  // Logout ngay lập tức, clear toàn bộ trạng thái người dùng và redirect về login
+  const logoutImmediate = async () => {
+    try {
+      // Xóa token
+      clearTokens()
+      // Clear user info and cart if possible
+      try {
+        const { useUserStore } = await import('./user')
+        const userStore = useUserStore()
+        userStore.userInfo = null
+      } catch {
+        // ignore
+      }
+      try {
+        const { useCartStore } = await import('./cart')
+        const cartStore = useCartStore()
+        cartStore.cartItems = []
+        cartStore.cartId = null
+      } catch {
+        // ignore
+      }
+    } catch (error) {
+      console.error('logoutImmediate error:', error)
+    } finally {
+      // Redirect to login page
+      try {
+        window.location.href = '/login'
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   const loginWithGoogle = async (code) => {
     try {
       const { loginWithGoogle: loginGoogleAPI } = await import('../api/auth/post')
@@ -168,5 +247,5 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  return { accessToken, refreshToken, userRole, userId, isAuthenticated, registerUsers, loginUsers, logout, loginWithGoogle, changePassword, sendOtpToEmail, verifyOtpCode, sendOtpForForgotPasswordStore, resetPasswordWithOtpStore }
+  return { accessToken, refreshToken, userRole, userId, isAuthenticated, isAccessTokenExpired, saveTokens, clearTokens, refreshAccessToken, logoutImmediate, registerUsers, loginUsers, logout, loginWithGoogle, changePassword, sendOtpToEmail, verifyOtpCode, sendOtpForForgotPasswordStore, resetPasswordWithOtpStore }
 })
