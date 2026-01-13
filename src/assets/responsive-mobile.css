@@ -1,0 +1,64 @@
+/* Mobile-only, aggressive constraints to force full-screen scaling on phones
+   - This file is loaded after other styles and applies only on small viewports (<=640px)
+   - It does not change desktop layout or break component order, only constrains widths and reduces spacing
+*/
+
+@media (max-width: 640px) {
+  /* Global guards */
+  html, body, #app { overflow-x: hidden !important; width: 100vw !important; padding: 0 !important; margin: 0 !important; }
+  *, *::before, *::after { box-sizing: border-box !important; }
+
+  /* Force the app and main wrappers to exactly match device width */
+  #app, main, .container, .mx-auto, .max-w-6xl, .max-w-2xl, .max-w-lg, .max-w-full {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Hero / banner / background images must cover and not overflow */
+  .hero, .banner, .bg-hero, .bg-image, .page-section, section {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+
+  /* Constrain carousels/sliders */
+  .carousel, .slider, .swiper, .swiper-wrapper, .carousel-track {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Prevent flex children from forcing width; allow them to shrink */
+  .flex, .grid, .flex > *, .grid > *, header .flex, header .flex > * { min-width: 0 !important; flex-shrink: 1 !important; }
+
+  /* Inline elements such as header menu should compress rather than overflow */
+  header .px-20, header .px-10, header .p-4, header a, header button { padding-left: 0.35rem !important; padding-right: 0.35rem !important; }
+  header .h-20 { height: 52px !important; }
+  header img[src*="/img/logo.png"] { max-width: 96px !important; height: auto !important; }
+
+  /* Adjust banner text sizing so headline wraps nicely but does not create extra width */
+  .text-6xl, h1 { font-size: 28px !important; line-height: 1.05 !important; }
+  .text-4xl, .text-5xl { font-size: 22px !important; }
+
+  /* Footer background and content */
+  footer { background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important; }
+  footer .grid { grid-template-columns: 1fr !important; }
+  footer > div.h-full { padding-left: 0.8rem !important; padding-right: 0.8rem !important; }
+
+  /* Trim any leftover horizontal margins from specific elements */
+  .mx-8, .mx-4, .ml-8, .mr-8 { margin-left: 0.4rem !important; margin-right: 0.4rem !important; }
+
+  /* Small helper: ensure fixed-position or absolutely-positioned elements stay inside viewport */
+  [style*="position:fixed"], [style*="position:absolute"] { max-width: 100vw !important; box-sizing: border-box !important; }
+
+  /* Very small devices extra trim */
+  @media (max-width: 420px) {
+    #app, main, .container { padding-left: 0.4rem !important; padding-right: 0.4rem !important; }
+    .text-6xl, h1 { font-size: 24px !important; }
+    header .w-50 { width: 80px !important; }
+    header .h-15 { height: 34px !important; }
+  }
+}

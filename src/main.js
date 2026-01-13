@@ -1,5 +1,6 @@
 import "./assets/main.css"
 import "./assets/responsive.css"
+import "./assets/responsive-mobile.css"
 
 import { createApp } from "vue"
 import { createPinia } from "pinia"
