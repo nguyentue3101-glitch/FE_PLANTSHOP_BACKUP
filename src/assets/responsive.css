@@ -28,10 +28,27 @@
     padding: 0;
   }
 
-  /* Fix cho UserLayout - bỏ min-h-screen */
+  /* Fix cho UserLayout - bỏ min-h-screen và height thừa */
   .flex.flex-col.min-h-screen {
     min-height: auto !important;
     height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Fix cho container chính trong UserLayout */
+  .flex.flex-col.min-h-screen > div.w-full {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Bỏ tất cả height/min-height thừa từ containers */
+  .container,
+  .container.mx-auto,
+  .container.mx-30 {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
   }
 
   /* Fix cho header - giữ nguyên layout và tránh overflow */
@@ -101,6 +118,8 @@
   /* Fix khoảng trắng dưới footer - set height cho body dựa trên content */
   body {
     position: relative;
+    height: auto !important;
+    min-height: auto !important;
   }
 
   /* Bỏ tất cả khoảng trắng sau footer */
@@ -111,6 +130,27 @@
   /* Đảm bảo UserLayout không có height thừa */
   .flex.flex-col.min-h-screen > *:last-child {
     margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Fix cho tất cả sections - bỏ height thừa */
+  section {
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Đảm bảo không có element nào có height thừa */
+  div[class*="min-h"],
+  div[class*="h-"]:not([class*="h-64"]):not([class*="h-20"]):not([class*="h-12"]) {
+    min-height: auto !important;
+  }
+
+  /* Bỏ padding/margin thừa ở cuối trang */
+  body::after,
+  #app::after,
+  .flex.flex-col::after {
+    content: none !important;
+    display: none !important;
   }
 
   /* Đảm bảo các modal và dropdown vẫn hiển thị đúng kích thước */
@@ -214,13 +254,30 @@
     opacity: 1 !important;
   }
 
-  /* Scale bộ lọc để dễ tương tác */
+  /* Scale bộ lọc để dễ tương tác - KHÔNG đè lên banner */
   .container select,
   .container .flex.flex-col select {
     transform: scale(2) !important;
     transform-origin: top left !important;
+    margin-top: 1rem !important;
     margin-bottom: 0.5rem !important;
     width: 50% !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* Đảm bảo container bộ lọc có margin-top để không đè lên banner */
+  .container.mx-auto.px-4 > div:first-child,
+  .container .flex.flex-col.gap-4 {
+    margin-top: 1rem !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  /* Fix cho DataPager - đảm bảo không đè lên banner */
+  .container .flex.flex-col[class*="gap-4"] {
+    margin-top: 2rem !important;
+    padding-top: 1rem !important;
   }
 
   /* Fix cho ProductList - hiển thị 3 items mỗi dòng, thu nhỏ lại */
@@ -274,12 +331,29 @@
   }
 
   /* Thu nhỏ banner trên trang sản phẩm */
-  section.relative.h-\\[200px\\] {
+  section.relative.h-\\[200px\\],
+  section.relative[class*="h-"] {
     height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
   }
 
-  section.relative.h-\\[200px\\] h1 {
+  section.relative.h-\\[200px\\] h1,
+  section.relative[class*="h-"] h1 {
     font-size: 1.5rem !important;
+  }
+
+  /* Đảm bảo banner không bị đè bởi bộ lọc */
+  section.relative[class*="h-"] {
+    position: relative !important;
+    z-index: 0 !important;
+  }
+
+  /* Đảm bảo phần content sau banner có margin-top */
+  section.relative[class*="h-"] + div,
+  section.relative[class*="h-"] ~ div {
+    margin-top: 0 !important;
+    padding-top: 0.5rem !important;
   }
 }
 
