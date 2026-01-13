@@ -38,7 +38,7 @@
                                         Quy định của cửa hàng
                                     </p>
                                     <p class="mt-1 text-sm text-yellow-700">
-                                        Đơn hàng có số lượng từ <strong>10 sản phẩm</strong> trở lên cần đặt cọc
+                                        Đơn hàng có số lượng từ <strong>30 sản phẩm</strong> trở lên cần đặt cọc
                                         <strong>50%</strong> tổng giá trị đơn hàng (không tính phí vận chuyển) trước
                                         khi
                                         đơn hàng được xử lý.

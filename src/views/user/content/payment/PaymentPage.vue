@@ -635,7 +635,7 @@ const finalTotal = computed(() => {
 
 // Kiểm tra có cần đặt cọc không (COD + tổng số lượng >= 10)
 const needsDeposit = computed(() => {
-    return paymentMethod.value === 'COD' && totalQuantity.value >= 10
+    return paymentMethod.value === 'COD' && totalQuantity.value >= 30
 })
 
 // Tính số tiền cần đặt cọc (50% tổng tiền, KHÔNG tính phí ship)
