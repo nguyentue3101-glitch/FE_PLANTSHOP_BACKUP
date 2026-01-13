@@ -9,6 +9,11 @@
 */
 
 @media (max-width: 640px) {
+  /* Prevent horizontal overflow on phone sizes */
+  html, body, #app { overflow-x: hidden !important; width: 100% !important; }
+  img, svg, video, iframe { max-width: 100% !important; height: auto !important; display: block !important; }
+  .container, .mx-auto, .max-w-6xl, .max-w-2xl, .max-w-lg, .max-w-full { max-width: 100% !important; padding-left: 0.5rem !important; padding-right: 0.5rem !important; box-sizing: border-box; }
+
   /* Header - top info bar */
   header > .bg-green-800 {
     padding: 0.35rem 1rem !important;
